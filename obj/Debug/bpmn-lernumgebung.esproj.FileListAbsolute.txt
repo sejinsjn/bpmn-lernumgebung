@@ -1,0 +1,2 @@
+C:\Users\sedad\source\repos\bpmn-lernumgebung\bpmn-lernumgebung\obj\Debug\bpmn-lernumgebung.esproj.SuggestedBindingRedirects.cache
+C:\Users\sedad\source\repos\bpmn-lernumgebung\bpmn-lernumgebung\obj\Debug\bpmn-lernumgebung.esproj.CoreCompileInputs.cache
