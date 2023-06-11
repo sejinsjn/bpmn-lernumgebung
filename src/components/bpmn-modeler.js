@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Modeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
-import axios from "axios";
+import { saveAs } from "file-saver";
 
 function BpmnEditor() {
     const [diagram, setDiagram] = useState("");
@@ -37,11 +37,17 @@ function BpmnEditor() {
         }
     }, [diagram]);
 
-    const handleSave = async () => {
+    const handleSave = async (format) => {
         try {
-            const { xml } = await modelerRef.current.saveXML({ format: true });
-            console.log(xml);
-            // Save the xml to your server here
+            if (format === "xml") {
+                const { xml } = await modelerRef.current.saveXML({ format: true });
+                const blob = new Blob([xml], { type: "application/xml" });
+                saveAs(blob, "diagram.xml");
+            } else if (format === "svg") {
+                const { svg } = await modelerRef.current.saveSVG();
+                const blob = new Blob([svg], { type: "image/svg+xml" });
+                saveAs(blob, "diagram.svg");
+            }
         } catch (err) {
             console.log(err);
         }
@@ -49,7 +55,8 @@ function BpmnEditor() {
 
     return (
         <div className="App">
-            <button onClick={handleSave}>Save</button>
+            <button onClick={() => handleSave("xml")}>Save as XML</button>
+            <button onClick={() => handleSave("svg")}>Save as SVG</button>
             <div
                 ref={containerRef}
                 style={{
