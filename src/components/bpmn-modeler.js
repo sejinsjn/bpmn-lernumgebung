@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import Modeler from "bpmn-js/lib/Modeler";
+import Modeler from "bpmn-js/lib/modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { saveAs } from "file-saver";
