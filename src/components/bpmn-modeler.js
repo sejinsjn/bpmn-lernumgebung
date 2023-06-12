@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import modeler from "bpmn-js/lib/modeler";
+import modeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { saveAs } from "file-saver";
@@ -11,7 +11,7 @@ function BpmnEditor() {
 
     useEffect(() => {
         if (!modelerRef.current && containerRef.current) {
-            modelerRef.current = new Modeler({
+            modelerRef.current = new modeler({
                 container: containerRef.current,
                 keyboard: {
                     bindTo: document,
