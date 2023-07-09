@@ -24,12 +24,6 @@ function BpmnEditor() {
                     if (warnings.length) {
                         console.log("Warnings", warnings);
                     }
-
-                    const canvas = modelerRef.current.get("modeling");
-                    canvas.setColor("CalmCustomerTask", {
-                        stroke: "green",
-                        fill: "yellow",
-                    });
                 })
                 .catch((err) => {
                     console.log("error", err);
@@ -52,6 +46,7 @@ function BpmnEditor() {
             console.log(err);
         }
     };
+
 
     return (
         <div className="App">
