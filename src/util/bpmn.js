@@ -38,11 +38,11 @@ class BPMNProcess {
 class BPMNStartEvent {
     constructor(id) {
         this.id = id;
-        this.outgoing = null;
+        this.outgoing = [];
     }
 
-    setOutgoing(outgoing) {
-        this.outgoing = outgoing;
+    addOutgoing(outgoing) {
+        this.outgoing.push(outgoing);
     }
 }
 
@@ -50,16 +50,16 @@ class BPMNTask {
     constructor(id, name) {
         this.id = id;
         this.name = name;
-        this.incoming = null;
-        this.outgoing = null;
+        this.incoming = [];
+        this.outgoing = [];
     }
 
-    setIncoming(incoming) {
-        this.incoming = incoming;
+    addIncoming(incoming) {
+        this.incoming.push(incoming);
     }
 
-    setOutgoing(outgoing) {
-        this.outgoing = outgoing;
+    addOutgoing(outgoing) {
+        this.outgoing.push(outgoing);
     }
 }
 
@@ -67,12 +67,12 @@ class BPMNGateway {
     constructor(id, type) {
         this.id = id;
         this.type = type;
-        this.incoming = null;
+        this.incoming = [];
         this.outgoings = [];
     }
 
-    setIncoming(incoming) {
-        this.incoming = incoming;
+    addIncoming(incoming) {
+        this.incoming.push(incoming);
     }
 
     addOutgoing(outgoing) {
