@@ -1,13 +1,13 @@
-import modeler from "bpmn-js/lib/Modeler";
+import BpmnModeler from 'bpmn-js/dist/bpmn-modeler.production.min.js';
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 
-function Viewer() {
+export default function App() {
+    const [diagram, setDiagram] = useState("");
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
-    const [diagram, setDiagram] = useState("");
-
+    
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -22,7 +22,7 @@ function Viewer() {
 
     useEffect(() => {
         if (!modelerRef.current && containerRef.current) {
-            modelerRef.current = new modeler({
+            modelerRef.current = new BpmnModeler({
                 container: containerRef.current,
                 keyboard: {
                     bindTo: document,
@@ -60,5 +60,3 @@ function Viewer() {
         </div>
     );
 }
-
-export default Viewer;

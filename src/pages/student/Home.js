@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Home = () => {
+const StudentHome = () => {
     return (
         <div className="container text-center" style={{ marginTop: "20%" }}>
             <Link to="/uebung1">
@@ -24,4 +24,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default StudentHome;
