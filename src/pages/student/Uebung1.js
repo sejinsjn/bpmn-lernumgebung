@@ -4,6 +4,7 @@ import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from "file-saver";
 import { parseAndStoreBpmnProcessElements, createTree, compareTrees } from '../../utils/uebung';
+import './Uebung1.css';
 
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
     const [diagram2, setDiagram2] = useState("");
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
+    const feedbackRef = useRef("");
     
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -59,7 +61,13 @@ export default function App() {
         var tree = createTree(maps[0], maps[1], maps[2]);
         var tree2 = createTree(maps2[0], maps2[1], maps2[2]);
 
-        console.log(compareTrees(tree, tree2));
+        if(compareTrees(tree, tree2)){
+            feedbackRef.current.textContent = "Die beiden Diagramme sind gleich!";
+        }else{
+            
+            feedbackRef.current.textContent = "Die beiden Diagramme sind nicht gleich!";
+        }
+        
     };
 
     useEffect(() => {
@@ -106,22 +114,28 @@ export default function App() {
     return (
         <div className="App">
             <div>
-                <input type="file" accept=".xml" onChange={handleFileChange} />
-                <input type="file" accept=".xml" onChange={handleFileChange2} />
-                <button onClick={() => handleSave("xml")}>Save as XML</button>
-                <button onClick={() => handleSave("svg")}>Save as SVG</button>
+                <div className="description">
+                    Bitte wählen Sie zwei Diagramme im XML-Format aus und öffnen Sie diese über die zwei Button hier drunter. Falls Sie keine 
+                    fertigen Diagramme als XML besitzen, können Sie im Editor eins erstellen und abspeichern. Nachdem Sie zwei Diagramme ausgewählt haben,
+                    drücken Sie den "Compare"-Button um die beiden Diagramme zu vergleichen.
+                </div>
+                <div>
+                    <div>
+                        <input type="file" accept=".xml" onChange={handleFileChange} />
+                        <input type="file" accept=".xml" onChange={handleFileChange2} />
+                        <button onClick={() => handleSave("xml")}>Save as XML</button>
+                        <button onClick={() => handleSave("svg")}>Save as SVG</button>
+                    </div>
+                    <div className="editor" ref={containerRef}
+                    ></div>
+                    <div>
+                        <button onClick={() => checkIfSame(diagram, diagram2)}>Compare</button>
+                    </div>
+                </div>
             </div>
-            <div
-                ref={containerRef}
-                style={{
-                    border: "1px solid #000000",
-                    height: "90vh",
-                    width: "90vw",
-                    margin: "auto",
-                }}
-            ></div>
-            <div>
-                <button onClick={() => checkIfSame(diagram, diagram2)}>Compare</button>
+           
+            <div className="feedback" ref={feedbackRef}>
+                
             </div>
         </div>
     );
