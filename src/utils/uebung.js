@@ -1,41 +1,37 @@
-const sequenceFlows = new Map();
-const bpmnElements = new Map();
-
 export function parseAndStoreBpmnProcessElements(xmlString) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-    console.log(xmlDoc);
-    const nsResolver = (prefix) => {
-        const ns = {
-          bpmn: "http://www.omg.org/spec/BPMN/20100524/MODEL",
-        };
-        return ns[prefix] || null;
+   const sequenceFlows = new Map();
+   const bpmnElements = new Map();
+   const parser = new DOMParser();
+   const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+   const nsResolver = (prefix) => {
+      const ns = {
+         bpmn: "http://www.omg.org/spec/BPMN/20100524/MODEL",
       };
+      return ns[prefix] || null;
+   };
 
-    const xpathResult = xmlDoc.evaluate(
-        "//bpmn:process",
-        xmlDoc,
-        nsResolver,
-        XPathResult.ANY_TYPE,
-        null
-    );
+   const xpathResult = xmlDoc.evaluate(
+      "//bpmn:process",
+      xmlDoc,
+      nsResolver,
+      XPathResult.ANY_TYPE,
+      null
+   );
 
-    let node = xpathResult.iterateNext();
-    const children = node.children;
-    for (let i = 0; i < children.length; i++) {
-        if(children[i].nodeName === "bpmn:sequenceFlow"){
-            sequenceFlows.set(children[i].getAttribute("id"), children[i]);
-            console.log("SequenceFlow: " + children[i].nodeName);
-        }else{
-            bpmnElements.set(children[i].getAttribute("id"), children[i]);
-            console.log("BPMNElements: " + children[i].nodeName);
-        }
-    }
+   let node = xpathResult.iterateNext();
+   const children = node.children;
+   for (let i = 0; i < children.length; i++) {
+      if(children[i].nodeName === "bpmn:sequenceFlow"){
+         sequenceFlows.set(children[i].getAttribute("id"), children[i]);
+      }else{
+         bpmnElements.set(children[i].getAttribute("id"), children[i]);
+      }
+   }
 
-    console.log(createTree(children[0]));
+   return [children[0], bpmnElements, sequenceFlows];
 }
 
-function createTree(rootNode, visited = new Set()) {
+export function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {
    if (visited.has(rootNode.getAttribute("id"))) {
      // Cycle detected
      return null;
@@ -44,6 +40,7 @@ function createTree(rootNode, visited = new Set()) {
    const root = bpmnElements.get(rootNode.getAttribute("id"));
    const tree = {
      node: rootNode,
+     name: rootNode.nodeName,
      children: []
    };
  
@@ -53,7 +50,7 @@ function createTree(rootNode, visited = new Set()) {
    outgoingFlows.forEach((flow) => {
      const flowId = flow.textContent;
      const targetId = sequenceFlows.get(flowId).getAttribute("targetRef");
-     const subtree = createTree(bpmnElements.get(targetId), visited);
+     const subtree = createTree(bpmnElements.get(targetId), bpmnElements, sequenceFlows, visited);
      if (subtree) {
        tree.children.push(subtree);
      }
@@ -63,4 +60,32 @@ function createTree(rootNode, visited = new Set()) {
  
    return tree;
  }
+ 
+export function compareTrees(tree1, tree2) {
+   if (tree1.name !== tree2.name) {
+     return false;
+   }
+   
+   if((!tree1.node.hasAttribute("name") && tree2.node.hasAttribute("name")) || (tree1.node.hasAttribute("name") && !tree2.node.hasAttribute("name"))){
+      return false;
+   }
+
+   if(tree1.node.hasAttribute("name") && tree2.node.hasAttribute("name")){
+      if (tree1.node.getAttribute("name").toLowerCase() !== tree2.node.getAttribute("name").toLowerCase()) {
+         return false;
+      }
+   }
+   
+   if (tree1.children.length !== tree2.children.length) {
+     return false;
+   }
+ 
+   for (let i = 0; i < tree1.children.length; i++) {
+     if (!compareTrees(tree1.children[i], tree2.children[i])) {
+       return false;
+     }
+   }
+ 
+   return true;
+}
  

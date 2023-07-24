@@ -3,10 +3,12 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from "file-saver";
-import { parseAndStoreBpmnProcessElements } from '../../utils/uebung';
+import { parseAndStoreBpmnProcessElements, createTree, compareTrees } from '../../utils/uebung';
+
 
 export default function App() {
     const [diagram, setDiagram] = useState("");
+    const [diagram2, setDiagram2] = useState("");
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
     
@@ -17,7 +19,18 @@ export default function App() {
         reader.onload = (e) => {
             const xmlContent = e.target.result;
             setDiagram(xmlContent);
-            parseAndStoreBpmnProcessElements(xmlContent);
+        };
+
+        reader.readAsText(file);
+    };
+
+    const handleFileChange2 = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const xmlContent = e.target.result;
+            setDiagram2(xmlContent);
         };
 
         reader.readAsText(file);
@@ -37,6 +50,16 @@ export default function App() {
         } catch (err) {
             console.log(err);
         }
+    };
+
+    const checkIfSame = async (diagram, diagram2) => {
+        var maps = parseAndStoreBpmnProcessElements(diagram);
+        var maps2 = parseAndStoreBpmnProcessElements(diagram2);
+
+        var tree = createTree(maps[0], maps[1], maps[2]);
+        var tree2 = createTree(maps2[0], maps2[1], maps2[2]);
+
+        console.log(compareTrees(tree, tree2));
     };
 
     useEffect(() => {
@@ -84,6 +107,7 @@ export default function App() {
         <div className="App">
             <div>
                 <input type="file" accept=".xml" onChange={handleFileChange} />
+                <input type="file" accept=".xml" onChange={handleFileChange2} />
                 <button onClick={() => handleSave("xml")}>Save as XML</button>
                 <button onClick={() => handleSave("svg")}>Save as SVG</button>
             </div>
@@ -96,6 +120,9 @@ export default function App() {
                     margin: "auto",
                 }}
             ></div>
+            <div>
+                <button onClick={() => checkIfSame(diagram, diagram2)}>Compare</button>
+            </div>
         </div>
     );
 }
