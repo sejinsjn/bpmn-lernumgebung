@@ -3,6 +3,7 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from "file-saver";
+import { parseAndStoreBpmnProcessElements } from '../../utils/uebung';
 
 export default function App() {
     const [diagram, setDiagram] = useState("");
@@ -16,6 +17,7 @@ export default function App() {
         reader.onload = (e) => {
             const xmlContent = e.target.result;
             setDiagram(xmlContent);
+            parseAndStoreBpmnProcessElements(xmlContent);
         };
 
         reader.readAsText(file);

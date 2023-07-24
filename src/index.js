@@ -25,7 +25,6 @@ export default function App() {
                     <Route path="uebung1" element={<Uebung1 />} />
                     <Route path="uebung2" element={<Uebung2 />} />
                     <Route path="uebung3" element={<Uebung3 />} />
-                    
                 </Route>
             </Routes>
         </BrowserRouter>

@@ -3,7 +3,6 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import './Uebung3.css';
-import { convertXMLToString } from '../../utils/uebung';
 
 var selectedElements = [];
 var xmlDiagram = "";
@@ -125,7 +124,6 @@ export default function Uebung3() {
             ></div>
             <div>
                 <button onClick={() => checkSelectedElements(selectedElements)}>Check</button>
-                <button onClick={() => convertXMLToString(xmlDiagram)}>Check</button>
             </div>
         </div>
     );
