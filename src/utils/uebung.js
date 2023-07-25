@@ -57,35 +57,64 @@ export function createTree(rootNode, bpmnElements, sequenceFlows, visited = new 
    });
  
    visited.delete(rootNode.getAttribute("id"));
- 
    return tree;
  }
  
-export function compareTrees(tree1, tree2) {
+ export function compareTrees(tree1, tree2) {
    if (tree1.name !== tree2.name) {
-     return false;
-   }
-   
-   if((!tree1.node.hasAttribute("name") && tree2.node.hasAttribute("name")) || (tree1.node.hasAttribute("name") && !tree2.node.hasAttribute("name"))){
       return false;
    }
 
-   if(tree1.node.hasAttribute("name") && tree2.node.hasAttribute("name")){
-      if (tree1.node.getAttribute("name").toLowerCase() !== tree2.node.getAttribute("name").toLowerCase()) {
+   // Check text content
+   let children1 = tree1.node.children;
+   let children2 = tree2.node.children;
+   let length = Math.min(children1.length, children2.length);
+
+   for (let i = 0; i < length; i++) {
+      let child1 = children1[i];
+      let child2 = children2[i];
+      if (child1.nodeName !== "bpmn:incoming" && child1.nodeName !== "bpmn:outgoing") {
+         if (child1.textContent !== child2.textContent) {
+            console.log(child1.textContent);
+            return false;
+         }
+      }
+   }
+
+   let nodeAttributes1 = tree1.node.attributes;
+   let nodeAttributes2 = tree2.node.attributes;
+   length = Math.min(nodeAttributes1.length, nodeAttributes2.length);
+
+   for (let i = 0; i < length; i++) {
+      let attr1 = nodeAttributes1[i];
+      let attr2 = nodeAttributes2[i];
+
+      if ((attr1 !== null && attr2 === null) || (attr1 === null && attr2 !== null)) {
+         return false;
+      }
+
+      if (attr1.name !== "id") {
+         if (attr1 !== null && attr2 !== null) {
+            if (attr1.value !== attr2.value) {
+               return false;
+            }
+         }
+      }
+   }
+
+   if (tree1.children.length !== tree2.children.length) {
+      return false;
+   }
+
+   for (let i = 0; i < tree1.children.length; i++) {
+      if (!compareTrees(tree1.children[i], tree2.children[i])) {
          return false;
       }
    }
-   
-   if (tree1.children.length !== tree2.children.length) {
-     return false;
-   }
- 
-   for (let i = 0; i < tree1.children.length; i++) {
-     if (!compareTrees(tree1.children[i], tree2.children[i])) {
-       return false;
-     }
-   }
- 
+
    return true;
 }
+
+
+
  
