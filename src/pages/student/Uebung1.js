@@ -3,7 +3,7 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from "file-saver";
-import { parseAndStoreBpmnProcessElements, createTree, compareTrees } from '../../utils/uebung';
+import { parseAndStoreBpmnProcessElements, createTree, compareTrees, findMissingElements, compareProcesses } from '../../utils/uebung';
 import './Uebung1.css';
 
 
@@ -58,16 +58,11 @@ export default function App() {
         var maps = parseAndStoreBpmnProcessElements(diagram);
         var maps2 = parseAndStoreBpmnProcessElements(diagram2);
 
-        var tree = createTree(maps[0], maps[1], maps[2]);
-        var tree2 = createTree(maps2[0], maps2[1], maps2[2]);
-
-        if(compareTrees(tree, tree2)){
-            feedbackRef.current.textContent = "Die beiden Diagramme sind gleich!";
+        if(maps.length !== maps2.length){
+            feedbackRef.current.textContent = "Die beiden Diagramme sind nicht gleich! Unterschiedliche Anzahl von Prozessen!";
         }else{
-            
-            feedbackRef.current.textContent = "Die beiden Diagramme sind nicht gleich!";
+            feedbackRef.current.textContent = compareProcesses(maps, maps2);
         }
-        
     };
 
     useEffect(() => {
