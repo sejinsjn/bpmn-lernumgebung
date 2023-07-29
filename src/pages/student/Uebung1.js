@@ -3,8 +3,8 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from "file-saver";
-import { parseAndStoreBpmnProcessElements, createTree, compareTrees, findMissingElements, compareProcesses } from '../../utils/uebung';
 import './Uebung1.css';
+import { compareBpmnDiagrams } from '../../utils/bpmnChecker';
 
 
 export default function App() {
@@ -54,15 +54,8 @@ export default function App() {
         }
     };
 
-    const checkIfSame = async (diagram, diagram2) => {
-        var maps = parseAndStoreBpmnProcessElements(diagram);
-        var maps2 = parseAndStoreBpmnProcessElements(diagram2);
-
-        if(maps.length !== maps2.length){
-            feedbackRef.current.textContent = "Die beiden Diagramme sind nicht gleich! Unterschiedliche Anzahl von Prozessen!";
-        }else{
-            feedbackRef.current.textContent = compareProcesses(maps, maps2);
-        }
+    const checkIfSame = async (diagram1, diagram2) => {
+        feedbackRef.current.textContent = compareBpmnDiagrams(diagram1, diagram2);
     };
 
     useEffect(() => {
@@ -75,20 +68,6 @@ export default function App() {
             });
 
             setDiagram(modelerRef.current.createDiagram());
-
-            var eventBus = modelerRef.current.get('eventBus');
-            eventBus.on('element.click', function(event) {
-                var element = event.element;
-                var modeling = modelerRef.current.get('modeling');
-                modeling.setColor(element, {
-                    fill: 'red',
-                    stroke: 'black'
-                });
-                //output for the console
-                var id = element.id;
-                var name = element.businessObject.name;
-                console.log("Clicked " + id + " with the name: " + name);
-            });
         }
 
         if (modelerRef.current && diagram) {
