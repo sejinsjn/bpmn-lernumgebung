@@ -54,7 +54,7 @@ function compareTrees(tree1, tree2) {
  }
  
  function compareParticipants(participant1, participant2) {
-    if(participant1.length !== participant2.length){
+    if(participant1.length !== participant2.length || participant1 === undefined || participant2 === undefined){
        return false;
     }
     for(var j = 0; j < participant1.length; j++){
@@ -73,7 +73,7 @@ function compareTrees(tree1, tree2) {
  }
 
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2){
-    if(messageFlows1.length !== messageFlows2.length){
+    if(messageFlows1.length !== messageFlows2.length || messageFlows1 === undefined || messageFlows2 === undefined){
         return false;
     }
 
@@ -95,7 +95,7 @@ function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messag
 }
 
 function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
-    if(laneSets1.length !== laneSets2.length){
+    if(laneSets1.length !== laneSets2.length || laneSets1 === undefined || laneSets2 === undefined){
         return false;
     }
 
