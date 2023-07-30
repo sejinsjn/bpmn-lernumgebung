@@ -53,17 +53,20 @@ function compareTrees(tree1, tree2) {
     return true;
  }
  
- function compareParticipants(participant1, participant2) {
-    if(participant1.length !== participant2.length || participant1 === undefined || participant2 === undefined){
-       return false;
+ function compareParticipants(participants1, participants2) {
+    if(participants1 === undefined || participants2 === undefined || participants1.length !== participants2.length){
+        if(participants1 === undefined && participants2 === undefined){
+            return true;
+        }
+        return false;
     }
-    for(var j = 0; j < participant1.length; j++){
-       const attributes1 = participant1[j].attributes;
-       const attributes2 = participant2[j].attributes;
+    for(var j = 0; j < participants1.length; j++){
+       const attributes1 = participants1[j].attributes;
+       const attributes2 = participants2[j].attributes;
        
        for (let i = 0; i < attributes1.length; i++) {
           const attrName = attributes1[i].name;
-          if ((attrName !== "id" || attrName !== "processRef") && participant1[j].getAttribute(attrName) !== participant2[j].getAttribute(attrName)) {
+          if ((attrName !== "id" || attrName !== "processRef") && participants1[j].getAttribute(attrName) !== participants2[j].getAttribute(attrName)) {
              return false;
           }
        }
@@ -73,7 +76,10 @@ function compareTrees(tree1, tree2) {
  }
 
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2){
-    if(messageFlows1.length !== messageFlows2.length || messageFlows1 === undefined || messageFlows2 === undefined){
+    if(messageFlows1 === undefined || messageFlows2 === undefined || messageFlows1.length !== messageFlows2.length){
+        if(messageFlows1 === undefined && messageFlows2 === undefined){
+            return true;
+        }
         return false;
     }
 
@@ -95,7 +101,10 @@ function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messag
 }
 
 function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
-    if(laneSets1.length !== laneSets2.length || laneSets1 === undefined || laneSets2 === undefined){
+    if(laneSets1 === undefined || laneSets2 === undefined || laneSets1.length !== laneSets2.length){
+        if(laneSets1 === undefined && laneSets2 === undefined){
+            return true;
+        }
         return false;
     }
 
@@ -206,10 +215,10 @@ export function compareBpmnDiagrams(diagram1, diagram2){
             }
         }
 
-        if(!compareParticipants(collaborations1[0][0], collaborations2[0][0])){
+        if(!compareParticipants(collaborations1[0], collaborations2[0])){
            return "Die Akteure sind nicht richtig!";
         }
-        if(!compareMessageFlows(processes1[1], collaborations1[0][1], processes2[1], collaborations2[0][1])){
+        if(!compareMessageFlows(processes1[1], collaborations1[1], processes2[1], collaborations2[1])){
             return "Die MessageFlows stimmen nicht! Überprüfe diese nochmal!";
         }
     }
