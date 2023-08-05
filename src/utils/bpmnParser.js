@@ -59,12 +59,11 @@ function parseProcessElements(xpathResult){
 
 function parseCollaborationElements(xpathResult) {
     let node = xpathResult.iterateNext();
-    var collaborations = [];
+    const messageFlows = [];
+    const participants = [];
  
     while(node){
        var collaboration = null;
-       const messageFlows = [];
-       const participants = [];
  
        const children = node.children;
        for (let i = 0; i < children.length; i++) {
@@ -75,13 +74,10 @@ function parseCollaborationElements(xpathResult) {
              participants.push(children[i]);
           }
        }
- 
-       collaboration = [participants, messageFlows];
-       collaborations.push(collaboration);
- 
        node = xpathResult.iterateNext();
     }
-    return collaborations;
+
+    return [participants, messageFlows];
  }
 
  function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {

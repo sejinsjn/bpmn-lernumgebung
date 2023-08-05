@@ -60,6 +60,7 @@ function compareTrees(tree1, tree2) {
         }
         return false;
     }
+
     for(var j = 0; j < participants1.length; j++){
        const attributes1 = participants1[j].attributes;
        const attributes2 = participants2[j].attributes;
@@ -91,7 +92,8 @@ function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messag
         for (let i = 0; i < attributes1.length; i++) {
             const attrValue1 = attributes1[i].value;
             const attrValue2 = attributes2[i].value;
-            if (attributes1[i].name !== "id" && bpmnElements1.get(attrValue1).getAttribute("name") !== bpmnElements2.get(attrValue2).getAttribute("name")) {
+            if (attributes1[i].name !== "id" && bpmnElements1.get(attrValue1).getAttribute("name") !== bpmnElements2.get(attrValue2).getAttribute("name") 
+            && messageFlows1[j].nodeName !== messageFlows2[j].nodeName) {
                 return false;
             }
         }
@@ -147,7 +149,7 @@ function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
                 for (let i = 0; i < attributes1.length; i++) {
                     const attrValue1 = attributes1[i].value;
                     const attrValue2 = attributes2[i].value;
-                    console.log(attrValue1 + " " + attrValue2);
+
                     if (attributes1[i].name !== "id" && attrValue1 !== attrValue2) {
                         return false;
                     }
@@ -180,6 +182,7 @@ function findMissingElements(trees, bpmnElements) {
     }
   
     for (const [id, element] of bpmnElements) {
+        console.log(element);
       if (!treeElements.has(id)) {
         missingElements.push(element);
       }
@@ -201,11 +204,10 @@ export function compareBpmnDiagrams(diagram1, diagram2){
     for(var i = 0; i < processes1[0].length; i++){
         for(var j = 0; j < trees1.length; j++){
             if(compareTrees(trees1[j], trees2[j])){
-                let missingElements = findMissingElements(trees2, processes2[1])
+                let missingElements = findMissingElements(trees1, processes1[1])
                 if(missingElements.length !== 0){
                     return "Das Diagramm besitzt unerreichbare Element. Überprüfe dein Diagram nochmal.";
                 }
-                console.log(processes2[3]);
                 if(!compareLanes(processes1[1], processes1[3], processes2[1], processes2[3])){
                     return "Bitte überprüfen Sie Ihre Lanes im Diagram!";
                 }
