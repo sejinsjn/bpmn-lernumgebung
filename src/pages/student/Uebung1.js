@@ -9,8 +9,12 @@ import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 import './Uebung1.css';
 import { compareBpmnDiagrams } from '../../utils/bpmnChecker';
+import { parseBpmnDiagram } from '../../utils/bpmnParser';
+import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
+import Feedback from '../../components/feedback';
+import ReactMarkdown from 'react-markdown';
 
-const ResizableDivs = () => {
+const ResizableDivs = (randomNumber) => {
     React.useEffect(() => {
         var observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
@@ -50,37 +54,23 @@ const ResizableDivs = () => {
       
 
     // BPMN-Editor
+    const [task, setTask] = useState("");
     const [diagram, setDiagram] = useState("");
+    const [parsedDiagram, setParsedDiagram] = useState([]);
     const [solution, setSolution] = useState("");
+    const [parsedSolution, setParsedSolution] = useState([]);
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
     const feedbackRef = useRef("");
-
-    fetch('/json/uebung1.json')
-    .then(response => response.json())
-    .then(jsonData => {
-      // jsonData is the parsed JSON object received from the URL
-      const uebung1Object = jsonData;
-      const diagramURL = uebung1Object[1].diagram;
-
-      fetch(diagramURL)
-        .then(response => response.text())
-        .then(data => {
-          setSolution(data);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    })
-    .catch(error => {
-      console.error(error);
-    });
 
     const checkIfSame = async () => {
       try {
         const { xml } = await modelerRef.current.saveXML({ format: true });
         setDiagram(xml);
-        feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
+        //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
+        //compareBpmnDiagrams2(xml, solution);
+        
+        setParsedDiagram(parseBpmnDiagram(xml));
       } catch (err) {
         console.error(err);
       }
@@ -98,7 +88,45 @@ const ResizableDivs = () => {
       reader.readAsText(file);
   };
 
+  const handleSave = async (format) => {
+    try {
+        if (format === "xml") {
+            const { xml } = await modelerRef.current.saveXML({ format: true });
+            const blob = new Blob([xml], { type: "application/xml" });
+            saveAs(blob, "diagram.xml");
+        } else if (format === "svg") {
+            const { svg } = await modelerRef.current.saveSVG();
+            const blob = new Blob([svg], { type: "image/svg+xml" });
+            saveAs(blob, "diagram.svg");
+        }
+    } catch (err) {
+        console.log(err);
+    }
+  };
+
     useEffect(() => {
+      fetch('/json/uebung1.json')
+        .then(response => response.json())
+        .then(jsonData => {
+          // jsonData is the parsed JSON object received from the URL
+          const rNumber = randomNumber.randomNumber;
+          const diagramURL = jsonData[rNumber].diagram;
+          setTask(jsonData[rNumber].task);
+
+          fetch(diagramURL)
+            .then(response => response.text())
+            .then(data => {
+              setSolution(data);
+              setParsedSolution(parseBpmnDiagram(solution));
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
         if (!modelerRef.current && containerRef.current) {
             modelerRef.current = new BpmnModeler({
                 container: containerRef.current,
@@ -108,6 +136,8 @@ const ResizableDivs = () => {
             });
 
             setDiagram(modelerRef.current.createDiagram());
+            setParsedDiagram(parseBpmnDiagram(diagram));
+            console.log(parsedDiagram);
         }
 
         if (modelerRef.current && diagram) {
@@ -130,8 +160,10 @@ const ResizableDivs = () => {
                 <div className="editor" ref={containerRef}></div>
             </div>
             <div className='buttonContainerLeft'>
-            <input type="file" accept=".xml" onChange={handleFileChange} />
-            <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Testen</button>
+              <input type="file" accept=".xml" onChange={handleFileChange} />
+              <button onClick={() => handleSave("xml")}>Save as XML</button>
+              <button onClick={() => handleSave("svg")}>Save as SVG</button>
+              <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Testen</button>
               <button className='buttonContainerLeftButton'>Lösung</button>
             </div>
         </div>
@@ -141,17 +173,31 @@ const ResizableDivs = () => {
                 <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
             </div>
             <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
-                Right Div 0
+              <ReactMarkdown>{task}</ReactMarkdown>
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                Right Div 1
+                {initializeFeedback(parsedDiagram, parsedSolution)}
             </div>
-            </div>
+        </div>
       </div>
     );
   };
 
+  function initializeFeedback(bpmnDiagram, bpmnSolution) {
+    let result = [];
+    result.push(<Feedback Header='Anzahl der Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
+    result.push(<Feedback Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
+    result.push(<Feedback Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
+    result.push(<Feedback Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
+    result.push(<Feedback Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
+    result.push(<Feedback Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
+    result.push(<Feedback Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
+    return result;
+  }
+  
+
 export default function App() {
+  const randomNumber = Math.floor(Math.random() * 2) + 1;
     //<div className="editor" ref={containerRef}></div>
     return (
         <div className="App">
@@ -170,7 +216,7 @@ export default function App() {
                   </div>
                   
                 </div>
-                <ResizableDivs/>
+                <ResizableDivs randomNumber={randomNumber}/>
         </div>
     );
 }

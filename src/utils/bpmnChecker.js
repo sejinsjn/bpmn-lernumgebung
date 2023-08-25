@@ -182,7 +182,6 @@ function findMissingElements(trees, bpmnElements) {
     }
   
     for (const [id, element] of bpmnElements) {
-        console.log(element);
       if (!treeElements.has(id)) {
         missingElements.push(element);
       }
@@ -192,6 +191,7 @@ function findMissingElements(trees, bpmnElements) {
   }
 
 export function compareBpmnDiagrams(diagram1, diagram2){
+    /*
     const processes1 = parseBpmnElements("//bpmn:process", diagram1);
     const processes2 = parseBpmnElements("//bpmn:process", diagram2);
 
@@ -224,5 +224,5 @@ export function compareBpmnDiagrams(diagram1, diagram2){
             return "Die MessageFlows stimmen nicht! Überprüfe diese nochmal!";
         }
     }
-    return "Die beiden Diagramme sind gleich!";
+    return "Die beiden Diagramme sind gleich!";*/
 }

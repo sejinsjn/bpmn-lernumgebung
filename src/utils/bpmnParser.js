@@ -1,4 +1,4 @@
-export function parseBpmnElements(parentElementName, xmlString) {
+function parseBpmnElements(parentElementName, xmlString) {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "text/xml");
     const nsResolver = (prefix) => {
@@ -33,28 +33,42 @@ function parseProcessElements(xpathResult){
     const bpmnElements = new Map();
     const sequenceFlows = new Map();
     const laneSets = [];
+    const subProcesses = [];
 
     while(node){
         const children = node.children;
         for (let i = 0; i < children.length; i++) {
-           if(children[i].nodeName === "bpmn:startEvent"){
-              startEvents.push(children[i]);
-           }
-           if(children[i].nodeName === "bpmn:sequenceFlow"){
-              sequenceFlows.set(children[i].getAttribute("id"), children[i]);
-           }else{
-              if(children[i].nodeName === "bpmn:laneSet"){
-                laneSets.push(children[i]);
-              }else{
-                bpmnElements.set(children[i].getAttribute("id"), children[i]);
-              }
-           }
-  
+         switch(children[i].nodeName){
+            case "bpmn:startEvent":
+               startEvents.push(children[i]);
+               break;
+            case "bpmn:sequenceFlow":
+               sequenceFlows.set(children[i].getAttribute("id"), children[i]);
+               break;
+            case "bpmn:laneSet":
+               laneSets.push(children[i]);
+               break;
+            case "bpmn:subProcess":
+               subProcesses.push(children[i]);
+               bpmnElements.set(children[i].getAttribute("id"), children[i]);
+               break;
+            default:
+               bpmnElements.set(children[i].getAttribute("id"), children[i]);
+               break;
+         }
         }
         node = xpathResult.iterateNext();
      }
-  
-     return [startEvents, bpmnElements, sequenceFlows, laneSets];
+     
+     const processes = {
+         startEvents: startEvents,
+         bpmnElements: bpmnElements,
+         sequenceFlows: sequenceFlows,
+         laneSets: laneSets,
+         subProcesses: subProcesses
+     }
+
+     return processes;
  }
 
 function parseCollaborationElements(xpathResult) {
@@ -63,8 +77,6 @@ function parseCollaborationElements(xpathResult) {
     const participants = [];
  
     while(node){
-       var collaboration = null;
- 
        const children = node.children;
        for (let i = 0; i < children.length; i++) {
           if(children[i].nodeName === "bpmn:messageFlow"){
@@ -77,7 +89,12 @@ function parseCollaborationElements(xpathResult) {
        node = xpathResult.iterateNext();
     }
 
-    return [participants, messageFlows];
+    const collaborations = {
+      participants: participants,
+      messageFlows: messageFlows
+    }
+
+    return collaborations;
  }
 
  function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {
@@ -110,11 +127,28 @@ function parseCollaborationElements(xpathResult) {
     return tree;
   }
 
-export function createTrees(processes){
+function createTrees(processes){
     let trees = [];
-    for(let i = 0; i < processes[0].length; i++){
-        trees.push(createTree(processes[0][i], processes[1], processes[2]));
+    for(let i = 0; i < processes.startEvents.length; i++){
+        trees.push(createTree(processes.startEvents[i], processes.bpmnElements, processes.sequenceFlows));
     }
 
     return trees;
+}
+
+export function parseBpmnDiagram(diagram){
+   // processes object contain 4 arrays with StartEvents, BpmnElements, Flows, LaneSets
+   const processes = parseBpmnElements("//bpmn:process", diagram);
+   // collaborations object contains 2 Arrays with participants and messageFlows
+   const collaborations = parseBpmnElements("//bpmn:collaboration", diagram);
+   // creates trees from all processes in the object
+   const trees = createTrees(processes);
+
+   const bpmnDiagram = {
+      processes: processes,
+      collaborations: collaborations,
+      trees: trees
+   }
+
+   return bpmnDiagram;
 }

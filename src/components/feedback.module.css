@@ -1,0 +1,58 @@
+.container {
+  width: 98%;
+  margin: 0 auto;
+  min-height: 40px;
+  border-radius: 5px;
+  background-color: #add8e6;
+}
+
+.container span{
+  padding: 10px 0 10px 0;
+}
+  
+  .toggle {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    margin: auto;
+    align-items: center;
+    height: 100%;
+    width: 95%;
+  }
+  
+  .arrow {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .down {
+    transform: rotate(45deg);
+  }
+  
+  .up {
+    transform: rotate(-135deg);
+  }
+  
+  .content {
+    background-color: #add8e6;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+
+  .content p{
+    padding: 5px;
+  }
+
+  .open {
+    max-height: 500px;
+  }
+  
+  
