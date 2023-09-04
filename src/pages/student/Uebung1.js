@@ -8,7 +8,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 import './Uebung1.css';
-import { compareBpmnDiagrams } from '../../utils/bpmnChecker';
+import { compareBpmnDiagrams, compareTrees } from '../../utils/bpmnChecker';
 import { parseBpmnDiagram } from '../../utils/bpmnParser';
 import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
 import Feedback from '../../components/feedback';
@@ -65,12 +65,25 @@ const ResizableDivs = (randomNumber) => {
 
     const checkIfSame = async () => {
       try {
-        const { xml } = await modelerRef.current.saveXML({ format: true });
-        setDiagram(xml);
+        let { xml } = await modelerRef.current.saveXML({ format: true });
         //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
         //compareBpmnDiagrams2(xml, solution);
         
         setParsedDiagram(parseBpmnDiagram(xml));
+          // This code will only run after setDiagram has finished updating the state
+          const wrongElements = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
+          const elementRegistry = modelerRef.current.get('elementRegistry');
+          const modeling = modelerRef.current.get('modeling');
+        
+          for(let e of wrongElements){
+            const element = elementRegistry.get(e.node.getAttribute("id"));
+            modeling.setColor(element, {
+              stroke: 'red'
+            });
+          }
+          
+          xml = await modelerRef.current.saveXML({ format: true });
+          setDiagram(xml);
       } catch (err) {
         console.error(err);
       }
@@ -137,7 +150,6 @@ const ResizableDivs = (randomNumber) => {
 
             setDiagram(modelerRef.current.createDiagram());
             setParsedDiagram(parseBpmnDiagram(diagram));
-            console.log(parsedDiagram);
         }
 
         if (modelerRef.current && diagram) {
@@ -185,13 +197,14 @@ const ResizableDivs = (randomNumber) => {
 
   function initializeFeedback(bpmnDiagram, bpmnSolution) {
     let result = [];
-    result.push(<Feedback Header='Anzahl der Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
-    result.push(<Feedback Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
-    result.push(<Feedback Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
-    result.push(<Feedback Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
-    result.push(<Feedback Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
-    result.push(<Feedback Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
-    result.push(<Feedback Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
+    result.push(<Feedback key={1} Header='Anzahl der Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
+    result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
+    result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
+    result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
+    result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
+    result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
+    result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
+
     return result;
   }
   

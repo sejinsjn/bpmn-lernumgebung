@@ -22,10 +22,11 @@ const Feedback = ({Header = "Prozesse", UserDiagram = [], Solution = []}) => {
 
 function variableLength(header, userDiagram, solution){
   let result = [];
+  let k = 0;
   if (solution instanceof Map) {
-    result.push(<span>{header} {userDiagram.size}/{solution.size}</span>);
+    result.push(<span key={k++}>{header} {userDiagram.size}/{solution.size}</span>);
   } else {
-    result.push(<span>{header} {userDiagram.length}/{solution.length}</span>);
+    result.push(<span key={k++}>{header} {userDiagram.length}/{solution.length}</span>);
   }
   return result;
 }

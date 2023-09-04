@@ -102,8 +102,7 @@ function parseCollaborationElements(xpathResult) {
       // Cycle detected
       return null;
     }
-  
-    const root = bpmnElements.get(rootNode.getAttribute("id"));
+
     const tree = {
       node: rootNode,
       name: rootNode.nodeName,
@@ -111,8 +110,8 @@ function parseCollaborationElements(xpathResult) {
     };
   
     visited.add(rootNode.getAttribute("id"));
-    if(root !== undefined){
-        const outgoingFlows = Array.from(root.getElementsByTagName("bpmn:outgoing"));
+    if(rootNode !== undefined){
+        const outgoingFlows = Array.from(rootNode.getElementsByTagName("bpmn:outgoing"));
         outgoingFlows.forEach((flow) => {
                 const flowId = flow.textContent;
                 const targetId = sequenceFlows.get(flowId).getAttribute("targetRef");
