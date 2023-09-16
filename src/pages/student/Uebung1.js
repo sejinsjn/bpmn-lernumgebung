@@ -74,7 +74,6 @@ const ResizableDivs = (randomNumber) => {
           const wrongElements = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
           const elementRegistry = modelerRef.current.get('elementRegistry');
           const modeling = modelerRef.current.get('modeling');
-        
           for(let e of wrongElements){
             const element = elementRegistry.get(e.node.getAttribute("id"));
             modeling.setColor(element, {
@@ -197,7 +196,7 @@ const ResizableDivs = (randomNumber) => {
 
   function initializeFeedback(bpmnDiagram, bpmnSolution) {
     let result = [];
-    result.push(<Feedback key={1} Header='Anzahl der Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
+    result.push(<Feedback key={1} Header='Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
     result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
     result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
     result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
