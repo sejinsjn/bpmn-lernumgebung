@@ -140,13 +140,6 @@ function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messag
 }
 
 function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
-    if(laneSets1 === undefined || laneSets2 === undefined || laneSets1.length !== laneSets2.length){
-        if(laneSets1 === undefined && laneSets2 === undefined){
-            return true;
-        }
-        return false;
-    }
-
     for(var j = 0; j < laneSets1.length; j++){
         let children1 = laneSets1[j].children;
         let children2 = laneSets2[j].children;

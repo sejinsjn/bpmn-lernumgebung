@@ -41,6 +41,7 @@ function parseProcessElements(xpathResult){
          switch(children[i].nodeName){
             case "bpmn:startEvent":
                startEvents.push(children[i]);
+               bpmnElements.set(children[i].getAttribute("id"), children[i]);
                break;
             case "bpmn:sequenceFlow":
                sequenceFlows.set(children[i].getAttribute("id"), children[i]);

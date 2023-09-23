@@ -75,7 +75,7 @@ const ResizableDivs = (randomNumber) => {
           const elementRegistry = modelerRef.current.get('elementRegistry');
           const modeling = modelerRef.current.get('modeling');
           for(let e of wrongElements){
-            const element = elementRegistry.get(e.node.getAttribute("id"));
+            const element = elementRegistry.get(e.getAttribute("id"));
             modeling.setColor(element, {
               stroke: 'red'
             });
