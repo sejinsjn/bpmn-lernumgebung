@@ -71,13 +71,22 @@ const ResizableDivs = (randomNumber) => {
         
         setParsedDiagram(parseBpmnDiagram(xml));
           // This code will only run after setDiagram has finished updating the state
-          const wrongElements = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
+          const compare = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
+          const wrongElements = compare.mismatches;
+          const rightElements = compare.matches;
           const elementRegistry = modelerRef.current.get('elementRegistry');
           const modeling = modelerRef.current.get('modeling');
           for(let e of wrongElements){
             const element = elementRegistry.get(e.getAttribute("id"));
             modeling.setColor(element, {
               stroke: 'red'
+            });
+          }
+          console.log(rightElements);
+          for(let e of rightElements){
+            const element = elementRegistry.get(e.getAttribute("id"));
+            modeling.setColor(element, {
+              stroke: 'black'
             });
           }
           

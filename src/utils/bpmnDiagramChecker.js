@@ -1,9 +1,13 @@
-function compareTree(tree1, tree2) {
+/**function compareTree(tree1, tree2) {
+    let matches = [];
     let mismatches = [];
     let nextMatchingElement = null;
 
     if (tree1.name !== tree2.name || tree1.children.length !== tree2.children.length) {
-       return mismatches;
+        for(let i = 0; i < tree1.children.length; i++){
+            mismatches.push(tree1.children[i].node);
+        }
+       return {matches, mismatches};
     }
 
     let nodeAttributes1 = Object.fromEntries(Array.from(tree1.node.attributes).map(attr => [attr.name, attr.value]));
@@ -23,10 +27,16 @@ function compareTree(tree1, tree2) {
 
                 if(children1.length !== 0 && children2.length !== 0){
                     for (let i = 0; i < nextMatchingElement.matchingElement.children.length; i++) {
-                        mismatches.push(...compareTree(nextMatchingElement.matchingElement.children[i], tree2.children[i]));
+                        let result = compareTree(nextMatchingElement.matchingElement.children[i], tree2.children[i]);
+                        matches.push(...result.matches);
+                        mismatches.push(...result.mismatches);
                     }
                 }
                 break;
+            }
+        }else{
+            if (attr !== "id" && nodeAttributes1[attr] === nodeAttributes2[attr]){
+                matches.push(tree1.node);
             }
         }
     }
@@ -37,12 +47,66 @@ function compareTree(tree1, tree2) {
     
         if(children1.length !== 0 && children2.length !== 0){
             for (let i = 0; i < tree1.children.length; i++) {
-                mismatches.push(...compareTree(tree1.children[i], tree2.children[i]));
+                let result = compareTree(tree1.children[i], tree2.children[i]);
+                matches.push(...result.matches);
+                mismatches.push(...result.mismatches);
             }
         }
     }
 
-    return mismatches;
+    return {matches: matches, mismatches: mismatches};
+}**/
+
+function compareTree(tree1, tree2) {
+    let matches = [];
+    let mismatches = [];
+    let nextMatchingElement = null;
+
+    let nodeAttributes1 = Object.fromEntries(Array.from(tree1.node.attributes).map(attr => [attr.name, attr.value]));
+    let nodeAttributes2 = Object.fromEntries(Array.from(tree2.node.attributes).map(attr => [attr.name, attr.value]));
+
+    if(Object.keys(nodeAttributes1).length === 1){
+        if(tree1.node.nodeName === tree2.node.nodeName && (tree1.node.nodeName === "bpmn:startEvent" || tree1.node.nodeName === "bpmn:endEvent")){
+            matches.push(tree1.node);
+            checkChildren(tree1.children, tree2.children);
+        }
+    }else{
+        for (let attr in nodeAttributes1) {
+            if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
+                nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
+                console.log(nextMatchingElement);
+                if(nextMatchingElement === null || nextMatchingElement.matchingElement === null){
+                    mismatches.push(tree1.node);
+                    checkChildren(tree1.children, tree2.children);
+                    break;
+                }else{
+                    mismatches.push(tree1.node);
+                    mismatches.push(...nextMatchingElement.nonMatchingElements);
+                    checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
+                    break;
+                }
+            }else{
+                if (attr !== "id" && nodeAttributes1[attr] === nodeAttributes2[attr]){
+                    matches.push(tree1.node);
+                    checkChildren(tree1.children, tree2.children);
+                }
+            }
+        }
+    }
+
+    function checkChildren(children1, children2){
+        if(children1.length !== 0 && children2.length !== 0){
+            for (let i = 0; i < children1.length; i++) {
+                for (let j = 0; j < children2.length; j++) {
+                    let result = compareTree(children1[i], children2[j]);
+                    matches.push(...result.matches);
+                    mismatches.push(...result.mismatches);
+                }
+            }
+        }
+    }
+
+    return {matches: matches, mismatches: mismatches};
 }
 
 function findNextMatchingElement(node, children) {
@@ -132,15 +196,15 @@ function treesToArray(trees){
 
 function compareTrees(trees1, trees2){
     const allNonMatchingElements = [];
-    if(trees1.length === trees2.length){
-        for(var i = 0; i < trees1.length; i++){
-            let nonMatchingElements = compareTree(trees1[i], trees2[i]);
-            allNonMatchingElements.push(...nonMatchingElements);
-        }
-    }else{
-      allNonMatchingElements.push(...treesToArray(trees1));
+    const allMatchingElements = [];
+
+    for(var i = 0; i < trees1.length; i++){
+        let compare = compareTree(trees1[i], trees2[i]);
+        allNonMatchingElements.push(...compare.mismatches);
+        allMatchingElements.push(...compare.matches);
     }
-    return allNonMatchingElements;
+    
+    return {matches: allMatchingElements, mismatches: allNonMatchingElements };
 }
 
 function compareParticipants(participants1, participants2) {
@@ -276,13 +340,15 @@ function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
 }
 
 export function compareBpmnDiagrams2(diagram1, diagram2){
-    let mistakes = [];
-    
-    mistakes.push(...compareTrees(diagram1.trees, diagram2.trees));
-    mistakes.push(...compareParticipants(diagram1.collaborations.participants, diagram2.collaborations.participants));
-    mistakes.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows));
-    mistakes.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets));
+    const allNonMatchingElements = [];
+    const allMatchingElements = [];
 
-    console.log(mistakes);
-    return mistakes;
+    const compare = compareTrees(diagram1.trees, diagram2.trees);
+    allNonMatchingElements.push(...compare.mismatches);
+    allMatchingElements.push(...compare.matches);
+    allNonMatchingElements.push(...compareParticipants(diagram1.collaborations.participants, diagram2.collaborations.participants));
+    allNonMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows));
+    allNonMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets));
+
+    return {matches: allMatchingElements, mismatches: allNonMatchingElements };
 }
