@@ -66,8 +66,11 @@ function compareTree(tree1, tree2) {
     let nodeAttributes2 = Object.fromEntries(Array.from(tree2.node.attributes).map(attr => [attr.name, attr.value]));
 
     if(Object.keys(nodeAttributes1).length === 1){
-        if(tree1.node.nodeName === tree2.node.nodeName && (tree1.node.nodeName === "bpmn:startEvent" || tree1.node.nodeName === "bpmn:endEvent")){
+        if(tree1.node.nodeName === tree2.node.nodeName && (tree1.node.nodeName !== "bpmn:task")){
             matches.push(tree1.node);
+            checkChildren(tree1.children, tree2.children);
+        }else{
+            mismatches.push(tree1.node);
             checkChildren(tree1.children, tree2.children);
         }
     }else{
@@ -241,103 +244,121 @@ function compareParticipants(participants1, participants2) {
     return allNonMatchingElements;
 }
 
-function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2){
-    const nonMatchingMessageFlows = [];
+function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2) {
+    let matchingMessageFlows = [];
+    let nonMatchingMessageFlows = [];
 
-    for(var j = 0; j < messageFlows1.length; j++){
-        const messageFlow1 = messageFlows1[j];
+    for (let messageFlow1 of messageFlows1) {
         let isMatchFound = false;
 
-        for(var k = 0; k < messageFlows2.length; k++){
-            const messageFlow2 = messageFlows2[k];
-            let isMatch = true;
-
-            const sourceRef1 = messageFlow1.getAttribute("sourceRef");
-            const targetRef1 = messageFlow1.getAttribute("targetRef");
-            const sourceRef2 = messageFlow2.getAttribute("sourceRef");
-            const targetRef2 = messageFlow2.getAttribute("targetRef");
-
-            if(bpmnElements1.get(sourceRef1) !== undefined && bpmnElements2.get(sourceRef2) !== undefined){
-                if(bpmnElements1.get(sourceRef1).getAttribute("name") !== bpmnElements2.get(sourceRef2).getAttribute("name") 
-                || bpmnElements1.get(targetRef1).getAttribute("name") !== bpmnElements2.get(targetRef2).getAttribute("name")
-                || messageFlow1.nodeName !== messageFlow2.nodeName) {
-                    isMatch = false;
-                }
-            }
-
-            if(isMatch){
+        for (let messageFlow2 of messageFlows2) {
+            if (isMatch(messageFlow1, messageFlow2, bpmnElements1, bpmnElements2)) {
                 isMatchFound = true;
                 break;
             }
         }
 
-        if(!isMatchFound){
+        if (isMatchFound) {
+            matchingMessageFlows.push(messageFlow1);
+        } else {
             nonMatchingMessageFlows.push(messageFlow1);
         }
     }
 
-    return nonMatchingMessageFlows;
-
+    return { matches: matchingMessageFlows, mismatches: nonMatchingMessageFlows };
 }
 
-function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2){
-    let nonMatchingLanes = [];
-    
-    for(var j = 0; j < laneSets1.length; j++){
-        let children1 = laneSets1[j].children;
-        let children2 = laneSets2[j].children;
+function isMatch(messageFlow1, messageFlow2, bpmnElements1, bpmnElements2) {
+    const sourceRef1 = messageFlow1.getAttribute("sourceRef");
+    const targetRef1 = messageFlow1.getAttribute("targetRef");
+    const sourceRef2 = messageFlow2.getAttribute("sourceRef");
+    const targetRef2 = messageFlow2.getAttribute("targetRef");
 
-        if(children1.length !== children2.length){
-            nonMatchingLanes.push(...laneSets1[j].children);
-            break;
+    if (bpmnElements1.get(sourceRef1) !== undefined && bpmnElements2.get(sourceRef2) !== undefined) {
+        if (bpmnElements1.get(sourceRef1).getAttribute("name") !== bpmnElements2.get(sourceRef2).getAttribute("name") 
+            || bpmnElements1.get(targetRef1).getAttribute("name") !== bpmnElements2.get(targetRef2).getAttribute("name")
+            || messageFlow1.nodeName !== messageFlow2.nodeName) {
+            return false;
         }
+    }
 
-        for(var i = 0; i < children1.length; i++){
-            const laneAttributes1 = children1[i].attributes;
-            const laneAttributes2 = children2[i].attributes;
+    return true;
+}
 
-            if(laneAttributes1.length !== laneAttributes2.length){
-                nonMatchingLanes.push(children1[i]);
-                break;
-            }
-            
-            for (let i = 0; i < laneAttributes1.length; i++) {
-                const attrValue1 = laneAttributes1[i].value;
-                const attrValue2 = laneAttributes2[i].value;
 
-                if (laneAttributes1[i].name !== "id" && attrValue1 !== attrValue2) {
-                    nonMatchingLanes.push(children1[i]);
+function compareLanes(bpmnElements1, laneSets1, bpmnElements2, laneSets2) {
+    let nonMatchingLanes = [];
+    let matchingLanes = [];
+
+    for (let laneSet1 of laneSets1) {
+        for (let child1 of laneSet1.children) {
+            let matchFound = false;
+            const laneAttributes1 = child1.attributes;
+
+            for (let laneSet2 of laneSets2) {
+                for (let child2 of laneSet2.children) {
+                    const laneAttributes2 = child2.attributes;
+
+                    if (!attributesMatch(laneAttributes1, laneAttributes2)) continue;
+
+                    const flowNodeRefs1 = Array.from(child1.getElementsByTagName("bpmn:flowNodeRef"));
+                    const flowNodeRefs2 = Array.from(child2.getElementsByTagName("bpmn:flowNodeRef"));
+
+                    if (!flowNodeRefsMatch(flowNodeRefs1, flowNodeRefs2, bpmnElements1, bpmnElements2)) continue;
+
+                    matchFound = true;
                     break;
                 }
+
+                if (matchFound) break;
             }
 
-            const flowNodeRefs1 = Array.from(children1[i].getElementsByTagName("bpmn:flowNodeRef"));
-            const flowNodeRefs2 = Array.from(children2[i].getElementsByTagName("bpmn:flowNodeRef"));
-
-            if(flowNodeRefs1.length !== flowNodeRefs2.length){
-                console.log(children1[i]);
-                nonMatchingLanes.push(children1[i]);
-                break;
-            }
-
-            for(var a = 0; a < flowNodeRefs1.length; a++){
-                const attributes1 = bpmnElements1.get(flowNodeRefs1[a].textContent).attributes;
-                const attributes2 = bpmnElements2.get(flowNodeRefs2[a].textContent).attributes;
-                for (let i = 0; i < attributes1.length; i++) {
-                    const attrValue1 = attributes1[i].value;
-                    const attrValue2 = attributes2[i].value;
-
-                    if (attributes1[i].name !== "id" && attrValue1 !== attrValue2) {
-                        nonMatchingLanes.push(children1[i]);
-                        break;
-                    }
-                }
+            if (matchFound) {
+                matchingLanes.push(child1);
+            } else {
+                nonMatchingLanes.push(child1);
             }
         }
     }
 
-    return nonMatchingLanes;
+    return { matches: matchingLanes, mismatches: nonMatchingLanes };
 }
+
+function attributesMatch(laneAttributes1, laneAttributes2) {
+    if (laneAttributes1.length !== laneAttributes2.length) return false;
+
+    for (let i = 0; i < laneAttributes1.length; i++) {
+        const attrValue1 = laneAttributes1[i].value;
+        const attrValue2 = laneAttributes2[i].value;
+
+        if (laneAttributes1[i].name !== "id" && attrValue1 !== attrValue2) return false;
+    }
+
+    return true;
+}
+
+function flowNodeRefsMatch(flowNodeRefs1, flowNodeRefs2, bpmnElements1, bpmnElements2) {
+    if (flowNodeRefs1.length !== flowNodeRefs2.length) return false;
+
+    for (let i = 0; i < flowNodeRefs1.length; i++) {
+        const element1 = bpmnElements1.get(flowNodeRefs1[i].textContent);
+        let matchFound = false;
+
+        for (let j = 0; j < flowNodeRefs2.length; j++) {
+            const element2 = bpmnElements2.get(flowNodeRefs2[j].textContent);
+
+            if (element1.nodeName === element2.nodeName) {
+                matchFound = true;
+                break;
+            }
+        }
+
+        if (!matchFound) return false;
+    }
+
+    return true;
+}
+
 
 export function compareBpmnDiagrams2(diagram1, diagram2){
     const allNonMatchingElements = [];
@@ -347,8 +368,10 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     allNonMatchingElements.push(...compare.mismatches);
     allMatchingElements.push(...compare.matches);
     allNonMatchingElements.push(...compareParticipants(diagram1.collaborations.participants, diagram2.collaborations.participants));
-    allNonMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows));
-    allNonMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets));
+    allNonMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows).mismatches);
+    allMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows).matches);
+    allNonMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets).mismatches);
+    allMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets).matches);
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements };
 }
