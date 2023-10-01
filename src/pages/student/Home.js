@@ -10,11 +10,6 @@ const StudentHome = () => {
                     Übung 1
                 </button>
             </Link>
-            <Link to="/uebung2">
-                <button type="button" className="btn btn-success btn-lg">
-                    Übung 2
-                </button>
-            </Link>
             <Link to="/uebung3">
                 <button type="button" className="btn btn-info btn-lg">
                     Übung 3

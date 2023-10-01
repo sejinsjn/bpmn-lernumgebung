@@ -2,7 +2,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StudentHome from "./pages/student/Home";
 import Uebung1 from "./pages/student/Uebung1";
-import Uebung2 from "./pages/student/Uebung2";
 import Uebung3 from "./pages/student/Uebung3";
 import Test from "./pages/student/Test";
 /*
@@ -25,7 +24,6 @@ export default function App() {
                     <Route index element={<StudentHome />} />
                     <Route path="test" element={<Test />} />
                     <Route path="uebung1" element={<Uebung1 />} />
-                    <Route path="uebung2" element={<Uebung2 />} />
                     <Route path="uebung3" element={<Uebung3 />} />
                 </Route>
             </Routes>

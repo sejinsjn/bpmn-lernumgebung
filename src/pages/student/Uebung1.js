@@ -196,25 +196,25 @@ const ResizableDivs = (randomNumber) => {
               <ReactMarkdown>{task}</ReactMarkdown>
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                {initializeFeedback(parsedDiagram, parsedSolution)}
+                {/* {initializeFeedback(parsedDiagram, parsedSolution)} */}
             </div>
         </div>
       </div>
     );
   };
 
-  function initializeFeedback(bpmnDiagram, bpmnSolution) {
-    let result = [];
-    result.push(<Feedback key={1} Header='Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
-    result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
-    result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
-    result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
-    result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
-    result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
-    result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
+  // function initializeFeedback(bpmnDiagram, bpmnSolution) {
+  //   let result = [];
+  //   result.push(<Feedback key={1} Header='Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
+  //   result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
+  //   result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
+  //   result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
+  //   result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
+  //   result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
+  //   result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
 
-    return result;
-  }
+  //   return result;
+  // }
   
 
 export default function App() {

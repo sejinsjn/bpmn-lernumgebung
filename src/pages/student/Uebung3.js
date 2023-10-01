@@ -3,14 +3,25 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
 import './Uebung3.css';
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import ReactMarkdown from 'react-markdown';
+import interact from 'interactjs';
+import Feedback from '../../components/feedback';
 
 var selectedElements = [];
 var xmlDiagram = "";
 
-export default function Uebung3() {
-    const [diagram, setDiagram] = useState("");
+const ResizableDivs = (randomNumber) => {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
+
+    const [diagram, setDiagram] = useState("");
+    const [task, setTask] = useState("");
+    const [vulnerabilities, setVulnerabilities] = useState("");
+    const [explanations, setExplanations] = useState("");
+    const [tips, setTips] = useState("");
 
     const [data, setData] = useState(null);
     
@@ -28,10 +39,8 @@ export default function Uebung3() {
     };
 
     const checkSelectedElements = (ids) => {
-        const sortedArray1 = [...data['1'].vulnerabilities].sort();
+        const sortedArray1 = [...vulnerabilities].sort();
         const sortedArray2 = [...selectedElements].sort();
-
-        console.log(sortedArray1);console.log(sortedArray2);
 
         const areEqual = sortedArray1.length === sortedArray2.length && sortedArray1.every((value, index) => value === sortedArray2[index]);
         if(areEqual){
@@ -41,7 +50,25 @@ export default function Uebung3() {
         }
     };
 
-    useEffect(() => {
+    const [activeRightDiv, setActiveRightDiv] = React.useState('task');
+
+    React.useEffect(() => {
+        interact('#rightDiv')
+          .resizable({
+            edges: { left: true }
+          })
+          .on('resizemove', function (event) {
+            var target = event.target;
+            var otherTarget = document.querySelector(`#leftDiv`);
+      
+            target.style.width = event.rect.width + 'px';
+            otherTarget.style.width = (otherTarget.parentNode.offsetWidth - event.rect.width) + 'px';
+          });
+      }, []);
+
+   
+
+      useEffect(() => {
         if (!viewerRef.current && containerRef.current) {
             viewerRef.current = new NavigatedViewer({
                 container: containerRef.current,
@@ -51,20 +78,30 @@ export default function Uebung3() {
             });
 
             fetch('/json/uebung3.json')
-                .then(res => res.json())
-                .then(data => {
-                    setDiagram(data["1"].xmlDiagram);
-                    setData(data);
-                    console.log(data);
+                .then(response => response.json())
+                .then(jsonData => {
+                    // jsonData is the parsed JSON object received from the URL
+                    const rNumber = randomNumber.randomNumber;
+                    const diagramURL = jsonData[rNumber].diagram;
+
+                    setTask(jsonData[rNumber].task);
+                    setExplanations(jsonData[rNumber].explanations);
+                    setVulnerabilities(jsonData[rNumber].vulnerabilities);
+                    setTips(jsonData[rNumber].tips);
+                    setData(jsonData);
+                    
+                    fetch(diagramURL)
+                    .then(response => response.text())
+                    .then(data => {
+                        setDiagram(data);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
                 })
                 .catch(error => {
-                    // handle any errors here
-                    console.error("e" + error);
+                    console.error(error);
                 });
-
-            if(data != null){
-                setDiagram(data['1'].xmlDiagram);
-            }
 
             var eventBus = viewerRef.current.get('eventBus');
             eventBus.on('element.click', function(event) {
@@ -83,7 +120,8 @@ export default function Uebung3() {
                         selectedElements.splice(index, 1);
                     }
                 }else{
-                    if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent') {
+                    if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent'  && type !== 'bpmn:Collaboration') {
+                        console.log(type);
                         canvas.addMarker(id, 'highlight');
                         selectedElements.push(id);
                     }
@@ -109,22 +147,52 @@ export default function Uebung3() {
     
 
     return (
-        <div className="Uebung3">
-            <div>
-                <input type="file" accept=".xml" onChange={handleFileChange} />
+        <div id="container">
+            <div id="leftDiv">
+                <div id="editorContainer">
+                    <div className="editor" ref={containerRef}></div>
+                </div>
+                <div className='buttonContainerLeft'>
+                <button className='buttonContainerLeftButton' onClick={() => {checkSelectedElements(selectedElements); setActiveRightDiv('result')}}>Testen</button>
+                <button className='buttonContainerLeftButton'>Lösung</button>
+                </div>
             </div>
-            <div
-                ref={containerRef}
-                style={{
-                    border: "1px solid #000000",
-                    height: "90vh",
-                    width: "90vw",
-                    margin: "auto",
-                }}
-            ></div>
-            <div>
-                <button onClick={() => checkSelectedElements(selectedElements)}>Check</button>
+            <div id="rightDiv">
+                <div className='buttonContainerRight'>
+                    <button className='divRightButton' onClick={() => setActiveRightDiv('task')} style={{ backgroundColor: activeRightDiv === 'task' ? 'lightblue' : '' }}>Aufgabe</button>
+                    <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
+                </div>
+                <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
+                    <ReactMarkdown>{task}</ReactMarkdown>
+                </div>
+                <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
+                    <Feedback Header='Schwachstellen' Description='You got this many right!'/>
+                </div>
             </div>
         </div>
     );
 }
+
+export default function App() {
+    const randomNumber = Math.floor(Math.random() * 2) + 1;
+      //<div className="editor" ref={containerRef}></div>
+      return (
+          <div className="App">
+                  <div id="header">
+                    <div className='leftHeader'>
+                      <Link id="backButton" to="/">
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                        <p id="backText">Zurück zur Startseite</p>
+                      </Link>
+                    </div>
+                    <div  className='middleHeader'>
+                      <h2 className='headerTitle'>Freies Modellieren</h2>
+                    </div>
+                    <div  className='rightHeader'>
+                      
+                    </div>
+                  </div>
+                <ResizableDivs randomNumber={randomNumber}/>
+          </div>
+      );
+  }

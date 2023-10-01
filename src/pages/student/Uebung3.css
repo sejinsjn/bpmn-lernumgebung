@@ -1,3 +1,166 @@
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
     fill: green !important; /* color elements as green */
 }
+
+:root, body, html{
+    height: 100%;
+    width: 100%;
+}
+
+.App{
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex-direction: column;
+}
+
+#header{
+    height: 10vh;
+    width: 100vw;
+}
+
+#container{
+    width: 100%;
+    height: 90vh;
+    display: flex;
+}
+
+#leftDiv{
+    width: 75%;
+    height: 90vh;
+    min-width: 20%;
+    border: 0.5px solid #000000;
+  }
+
+#rightDiv{
+    width: 25%;
+    height: 90vh;
+    min-width: 20%;
+    border: 0.5px solid #000000;
+  }
+  
+  #leftDiv {
+    background-color: lightblue;
+  }
+  
+  #task, #result {
+    display: none;
+    overflow: auto;
+  }
+  
+  #task.active, #result.active {
+    height: 94%;
+    display: block;
+  }
+  
+  #task {
+    background-color: white;
+  }
+  
+  #result {
+    background-color: white;
+  }
+  
+.divRightButton{
+    width: 150px;
+    height: 70%;
+    border-radius: 10px;
+    background-color: white;
+    margin-left: 15px;
+    border: none;
+}
+
+#editorContainer{
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+  
+.editor{
+    height: 100%;
+    width: 100%;
+    background-color: lightgray;
+}
+  
+.buttonContainerRight{
+    height: 6%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.buttonContainerLeft{
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.buttonContainerLeftButton{
+  width: 150px;
+  height: 50%;
+  border-radius: 10px;
+  background-color: white;
+  margin-left: 15px;
+  margin-right: 15px;
+  border: none;
+}
+
+.buttonContainerLeftButton:hover{
+  background-color: lightgray;
+}
+
+.fa-arrow-left{
+  height: 50%;
+}
+
+#header{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.leftHeader, .middleHeader, .rightHeader{
+  width: 33%;
+  height: 100%
+}
+
+.leftHeader{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 15px;
+}
+
+#backButton{
+  text-decoration: none;
+  color: black;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 100%;
+  align-items: center;
+}
+
+#backText{
+  margin:0;
+  margin-left: 5px;
+}
+
+.middleHeader{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.headerTitle{
+  text-align: center;
+}
