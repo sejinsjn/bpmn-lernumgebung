@@ -12,5 +12,13 @@
         "vulnerabilities": ["Activity_0u3h360","Activity_097mq4a" ],
         "explanations":[],
         "tips":""
+    },
+    "3": {
+        "task": "**Geld Abheben**",
+        "diagram": "/xml/GeldAbheben.xml",
+        "vulnerabilities": ["Activity_02fjru0"],
+        "explanations":["Der Prozess hat keine Endereignisse für die Fälle, in denen der Kunde die PIN dreimal falsch eingibt oder das Geld nicht entnimmt. Dies kann zu Verwirrung oder unerwünschten Ergebnissen führen.",
+    "Der Prozess hat keine Endergeignisse für die Fälle, dass der Kunde den Abhebevorgang abbricht."],
+        "tips":""
     }
 }

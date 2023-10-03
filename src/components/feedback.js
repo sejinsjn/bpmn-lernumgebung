@@ -3,7 +3,7 @@ import styles from './feedback.module.css';
 import ReactMarkdown from 'react-markdown';
 
 const Feedback = ({Header = "", Description = ""}) => {
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(true);
 
   return (
     <div className={styles.container}>

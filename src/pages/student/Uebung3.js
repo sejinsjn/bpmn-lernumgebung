@@ -22,6 +22,7 @@ const ResizableDivs = (randomNumber) => {
     const [vulnerabilities, setVulnerabilities] = useState("");
     const [explanations, setExplanations] = useState("");
     const [tips, setTips] = useState("");
+    const [feedback, setFeedback] = useState("");
 
     const [data, setData] = useState(null);
     
@@ -38,17 +39,35 @@ const ResizableDivs = (randomNumber) => {
         reader.readAsText(file);
     };
 
+    const countMatchingElements = (array1, array2) => {
+        let count = 0;
+        for (let i = 0; i < array1.length; i++) {
+            for (let j = 0; j < array2.length; j++) {
+                if (array1[i] === array2[j]) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    };
+
     const checkSelectedElements = (ids) => {
         const sortedArray1 = [...vulnerabilities].sort();
         const sortedArray2 = [...selectedElements].sort();
-
-        const areEqual = sortedArray1.length === sortedArray2.length && sortedArray1.every((value, index) => value === sortedArray2[index]);
-        if(areEqual){
-            console.log(true);
-        }else{
-            console.log(false);
+    
+        const count = countMatchingElements(sortedArray1, sortedArray2);
+        
+        if(count === sortedArray1.length){
+            setFeedback("Du hast alle Schwachstellen gefunden.");
+        }
+        if(count < sortedArray1.length){
+            setFeedback(`Du hast ${count}/${sortedArray1.length} Schwachstellen gefunden.`);
+        }
+        if(sortedArray2.length > sortedArray1.length){
+            setFeedback(`Du hast zu viele Element ausgewählt. Von diesen sind jedoch ${count} richtig`);
         }
     };
+    
 
     const [activeRightDiv, setActiveRightDiv] = React.useState('task');
 
@@ -83,7 +102,7 @@ const ResizableDivs = (randomNumber) => {
                     // jsonData is the parsed JSON object received from the URL
                     const rNumber = randomNumber.randomNumber;
                     const diagramURL = jsonData[rNumber].diagram;
-
+                    
                     setTask(jsonData[rNumber].task);
                     setExplanations(jsonData[rNumber].explanations);
                     setVulnerabilities(jsonData[rNumber].vulnerabilities);
@@ -144,7 +163,10 @@ const ResizableDivs = (randomNumber) => {
         }
     }, [diagram, data]);
 
-    
+    useEffect(() => {
+        // This code will run after the `feedback` state has been updated
+        console.log(feedback);
+      }, [feedback]);
 
     return (
         <div id="container">
@@ -166,7 +188,7 @@ const ResizableDivs = (randomNumber) => {
                     <ReactMarkdown>{task}</ReactMarkdown>
                 </div>
                 <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
-                    <Feedback Header='Schwachstellen' Description='You got this many right!'/>
+                    <Feedback Header='Schwachstellen' Description={feedback}/>
                 </div>
             </div>
         </div>
@@ -174,7 +196,7 @@ const ResizableDivs = (randomNumber) => {
 }
 
 export default function App() {
-    const randomNumber = Math.floor(Math.random() * 2) + 1;
+    const randomNumber = Math.floor(Math.random() * 3) + 1;
       //<div className="editor" ref={containerRef}></div>
       return (
           <div className="App">
@@ -186,7 +208,7 @@ export default function App() {
                       </Link>
                     </div>
                     <div  className='middleHeader'>
-                      <h2 className='headerTitle'>Freies Modellieren</h2>
+                      <h2 className='headerTitle'>Schwachstellenanalyse</h2>
                     </div>
                     <div  className='rightHeader'>
                       
