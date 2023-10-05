@@ -8,7 +8,6 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 import './Uebung1.css';
-import { compareBpmnDiagrams, compareTrees } from '../../utils/bpmnChecker';
 import { parseBpmnDiagram } from '../../utils/bpmnParser';
 import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
 import Feedback from '../../components/feedback';
@@ -68,30 +67,29 @@ const ResizableDivs = (randomNumber) => {
         let { xml } = await modelerRef.current.saveXML({ format: true });
         //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
         //compareBpmnDiagrams2(xml, solution);
-        
         setParsedDiagram(parseBpmnDiagram(xml));
-          // This code will only run after setDiagram has finished updating the state
-          const compare = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
-          const wrongElements = compare.mismatches;
-          const rightElements = compare.matches;
-          const elementRegistry = modelerRef.current.get('elementRegistry');
-          const modeling = modelerRef.current.get('modeling');
-          for(let e of wrongElements){
-            const element = elementRegistry.get(e.getAttribute("id"));
-            modeling.setColor(element, {
-              stroke: 'red'
-            });
-          }
-          console.log(rightElements);
-          for(let e of rightElements){
-            const element = elementRegistry.get(e.getAttribute("id"));
-            modeling.setColor(element, {
-              stroke: 'black'
-            });
-          }
-          
-          xml = await modelerRef.current.saveXML({ format: true });
-          setDiagram(xml);
+        // This code will only run after setDiagram has finished updating the state
+        const compare = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
+        const wrongElements = compare.mismatches;
+        const rightElements = compare.matches;
+        const elementRegistry = modelerRef.current.get('elementRegistry');
+        const modeling = modelerRef.current.get('modeling');
+        for(let e of wrongElements){
+          const element = elementRegistry.get(e.getAttribute("id"));
+          modeling.setColor(element, {
+            stroke: 'red'
+          });
+        }
+        console.log(rightElements);
+        for(let e of rightElements){
+          const element = elementRegistry.get(e.getAttribute("id"));
+          modeling.setColor(element, {
+            stroke: 'black'
+          });
+        }
+        
+        xml = await modelerRef.current.saveXML({ format: true });
+        setDiagram(xml);
       } catch (err) {
         console.error(err);
       }
@@ -102,28 +100,42 @@ const ResizableDivs = (randomNumber) => {
       const reader = new FileReader();
 
       reader.onload = (e) => {
-          const xmlContent = e.target.result;
-          setDiagram(xmlContent);
+        const xmlContent = e.target.result;
+
+        if (modelerRef.current && diagram) {
+          modelerRef.current.importXML(xmlContent)
+              .then(({ warnings }) => {
+                  if (warnings.length) {
+                      console.log("Warnings", warnings);
+                  }
+              })
+              .catch((err) => {
+                  console.log("Error", err);
+              });
+        }
       };
 
       reader.readAsText(file);
-  };
+    };
 
-  const handleSave = async (format) => {
-    try {
-        if (format === "xml") {
-            const { xml } = await modelerRef.current.saveXML({ format: true });
-            const blob = new Blob([xml], { type: "application/xml" });
-            saveAs(blob, "diagram.xml");
-        } else if (format === "svg") {
-            const { svg } = await modelerRef.current.saveSVG();
-            const blob = new Blob([svg], { type: "image/svg+xml" });
-            saveAs(blob, "diagram.svg");
-        }
-    } catch (err) {
-        console.log(err);
-    }
-  };
+    const handleSave = async (format) => {
+      try {
+          if (format === "xml") {
+              const { xml } = await modelerRef.current.saveXML({ format: true });
+              const blob = new Blob([xml], { type: "application/xml" });
+              saveAs(blob, "diagram.xml");
+          } else if (format === "svg") {
+              const { svg } = await modelerRef.current.saveSVG();
+              const blob = new Blob([svg], { type: "image/svg+xml" });
+              saveAs(blob, "diagram.svg");
+          }
+      } catch (err) {
+          console.log(err);
+      }
+    };
+
+    useEffect(() => {
+    }, [diagram]);
 
     useEffect(() => {
       fetch('/json/uebung1.json')
@@ -159,19 +171,7 @@ const ResizableDivs = (randomNumber) => {
             setDiagram(modelerRef.current.createDiagram());
             setParsedDiagram(parseBpmnDiagram(diagram));
         }
-
-        if (modelerRef.current && diagram) {
-            modelerRef.current.importXML(diagram)
-                .then(({ warnings }) => {
-                    if (warnings.length) {
-                        console.log("Warnings", warnings);
-                    }
-                })
-                .catch((err) => {
-                    console.log("Error", err);
-                });
-        }
-    }, [diagram]);
+    }, [parsedSolution]);
 
     return (
       <div id="container">

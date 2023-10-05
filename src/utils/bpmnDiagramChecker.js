@@ -1,67 +1,8 @@
-/**function compareTree(tree1, tree2) {
-    let matches = [];
-    let mismatches = [];
-    let nextMatchingElement = null;
-
-    if (tree1.name !== tree2.name || tree1.children.length !== tree2.children.length) {
-        for(let i = 0; i < tree1.children.length; i++){
-            mismatches.push(tree1.children[i].node);
-        }
-       return {matches, mismatches};
-    }
-
-    let nodeAttributes1 = Object.fromEntries(Array.from(tree1.node.attributes).map(attr => [attr.name, attr.value]));
-    let nodeAttributes2 = Object.fromEntries(Array.from(tree2.node.attributes).map(attr => [attr.name, attr.value]));
-
-    for (let attr in nodeAttributes1) {
-        if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
-            nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
-            if(nextMatchingElement === null){
-                mismatches.push(tree1.node);
-                break;
-            }else{
-                mismatches.push(tree1.node);
-                mismatches.push(...nextMatchingElement.nonMatchingElements);
-                let children1 = nextMatchingElement.matchingElement.node.children;
-                let children2 = tree2.node.children;
-
-                if(children1.length !== 0 && children2.length !== 0){
-                    for (let i = 0; i < nextMatchingElement.matchingElement.children.length; i++) {
-                        let result = compareTree(nextMatchingElement.matchingElement.children[i], tree2.children[i]);
-                        matches.push(...result.matches);
-                        mismatches.push(...result.mismatches);
-                    }
-                }
-                break;
-            }
-        }else{
-            if (attr !== "id" && nodeAttributes1[attr] === nodeAttributes2[attr]){
-                matches.push(tree1.node);
-            }
-        }
-    }
-
-    if(nextMatchingElement === null){
-        let children1 = tree1.node.children;
-        let children2 = tree2.node.children;
-    
-        if(children1.length !== 0 && children2.length !== 0){
-            for (let i = 0; i < tree1.children.length; i++) {
-                let result = compareTree(tree1.children[i], tree2.children[i]);
-                matches.push(...result.matches);
-                mismatches.push(...result.mismatches);
-            }
-        }
-    }
-
-    return {matches: matches, mismatches: mismatches};
-}**/
-
 function compareTree(tree1, tree2) {
     let matches = [];
     let mismatches = [];
     let nextMatchingElement = null;
-
+    
     let nodeAttributes1 = Object.fromEntries(Array.from(tree1.node.attributes).map(attr => [attr.name, attr.value]));
     let nodeAttributes2 = Object.fromEntries(Array.from(tree2.node.attributes).map(attr => [attr.name, attr.value]));
 
@@ -77,7 +18,6 @@ function compareTree(tree1, tree2) {
         for (let attr in nodeAttributes1) {
             if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
                 nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
-                console.log(nextMatchingElement);
                 if(nextMatchingElement === null || nextMatchingElement.matchingElement === null){
                     mismatches.push(tree1.node);
                     checkChildren(tree1.children, tree2.children);
@@ -200,7 +140,7 @@ function treesToArray(trees){
 function compareTrees(trees1, trees2){
     const allNonMatchingElements = [];
     const allMatchingElements = [];
-
+    
     for(var i = 0; i < trees1.length; i++){
         let compare = compareTree(trees1[i], trees2[i]);
         allNonMatchingElements.push(...compare.mismatches);

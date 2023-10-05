@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StudentHome from "./pages/student/Home";
 import Uebung1 from "./pages/student/Uebung1";
 import Uebung3 from "./pages/student/Uebung3";
-import Test from "./pages/student/Test";
+
 /*
 import TeacherHome from "./pages/teacher/Home";
 import Editor from "./pages/teacher/Editor";
@@ -22,7 +22,6 @@ export default function App() {
             <Routes>
                 <Route path="/">
                     <Route index element={<StudentHome />} />
-                    <Route path="test" element={<Test />} />
                     <Route path="uebung1" element={<Uebung1 />} />
                     <Route path="uebung3" element={<Uebung3 />} />
                 </Route>
