@@ -122,8 +122,7 @@ const ResizableDivs = (randomNumber) => {
       if(modelerRef.current != null){
         const elementRegistry = modelerRef.current.get('elementRegistry');
         const modeling = modelerRef.current.get('modeling');
-
-        console.log(compareResult);
+        
         for(let e of compareResult.nodeNameMismatch){const element = elementRegistry.get(e.getAttribute("id"));
           modeling.setColor(element, {
             stroke: 'red'
@@ -250,29 +249,32 @@ const ResizableDivs = (randomNumber) => {
     );
   };
 
- function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
-     let result = [];
-     let wrongElementString = "Die folgenden Elemente sind nicht richtig dargestellt oder gehören nicht ins Diagram. Überprüfe nochmal " +
-                      "auf Rechtschreibfehler und ob das ausgewählte Element stimmt." + 
-                      "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
-                      "Position erstellt wurde.sad";
-     let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. " + 
-                                  "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
-                                  "Position erstellt wurde.";
-     let missingElementString = "Die folgenden Element fehlen im Diagram.";
+function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
+    let result = [];
+    let wrongElementString = "Die folgenden Elemente sind nicht richtig dargestellt oder gehören nicht ins Diagram. Überprüfe nochmal " +
+                    "auf Rechtschreibfehler und ob das ausgewählte Element stimmt.\n" + 
+                    "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                    "Position erstellt wurde.";
+    result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={compareResult.mismatches} Matches={compareResult.matches}/>);
+    
+    let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. " + 
+                                "\nHinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                                "Position erstellt wurde.";
+    result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={compareResult.attrMismatch} Matches={compareResult.matches}/>);
+    
+    let missingElementString = "Die folgenden Element fehlen im Diagram.";
+    result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={compareResult.missingElements} Matches={compareResult.matches}/>);
 
-     result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={compareResult.mismatches} Matches={compareResult.matches}/>);
-     result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={compareResult.attrMismatch} Matches={compareResult.matches}/>);
-     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={compareResult.missingElements} Matches={compareResult.matches}/>);
-  //   result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
-  //   result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
-  //   result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
-  //   result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
-  //   result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
-  //   result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
 
-     return result;
-  }
+//   result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
+//   result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
+//   result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
+//   result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
+//   result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
+//   result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
+
+    return result;
+}
   
 
 export default function App() {

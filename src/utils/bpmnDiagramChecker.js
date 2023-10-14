@@ -146,6 +146,26 @@ function findNextMatchingElement(node, children) {
     return {nonMatchingElements: nonMatchingElements, matchingElement: null}; // Return null if no matching element is found
 }
 
+function turnTreesIntoArray(trees){
+    let elements = [];
+    
+    trees.forEach(child => elements.push(...turnTreeIntoArray(child)));
+
+    return elements;
+}
+
+
+function turnTreeIntoArray(tree){
+    let elements = [];
+    
+    if(tree.node !== undefined){
+        elements.push(tree.node);
+        if(tree.children !== undefined) tree.children.forEach(child => elements.push(...turnTreeIntoArray(child)));
+    }
+
+    return elements;
+}
+
 function compareTrees(trees1, trees2){
     const allNonMatchingElements = [];
     const allNonMatchingAttributes = [];
@@ -153,6 +173,9 @@ function compareTrees(trees1, trees2){
     const allMissingElements = [];
     const allMatchingElements = [];
     
+    if(trees1.length > trees2.length) allNonMatchingElements.push(...turnTreesIntoArray(trees1.splice(trees2.length)));
+    if(trees2.length > trees1.length) allMissingElements.push(...turnTreesIntoArray(trees2.splice(trees1.length)));
+
     for(var i = 0; i < trees1.length; i++){
         let compare = compareTree(trees1[i], trees2[i]);
         allNonMatchingElements.push(...compare.mismatches);
@@ -335,10 +358,14 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     const compareParticipantsResult = compareParticipants(diagram1.collaborations.participants, diagram2.collaborations.participants)
     allNonMatchingElements.push(...compareParticipantsResult.allNonMatchingElements);
     allMatchingElements.push(...compareParticipantsResult.allMatchingElements);
-    allNonMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows).mismatches);
-    allMatchingElements.push(...compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows).matches);
-    allNonMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets).mismatches);
-    allMatchingElements.push(...compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets).matches);
+
+    const compareMessageFlowsResult = compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows);
+    allNonMatchingElements.push(...compareMessageFlowsResult.mismatches);
+    allMatchingElements.push(...compareMessageFlowsResult.matches);
+    
+    const compareLanesResult = compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets);
+    allNonMatchingElements.push(...compareLanesResult.mismatches);
+    allMatchingElements.push(...compareLanesResult.matches);
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
