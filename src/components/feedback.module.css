@@ -1,9 +1,11 @@
 .container {
   width: 98%;
-  margin: 0 auto;
+  margin: 5px auto;
   min-height: 40px;
+  height: auto;
   border-radius: 5px;
   background-color: #add8e6;
+  overflow:auto;
 }
 
 .container span{
@@ -55,4 +57,11 @@
     max-height: 500px;
   }
   
-  
+.feedbackElements{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-direction: row;
+  margin: 10px;
+}

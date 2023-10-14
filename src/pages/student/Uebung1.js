@@ -10,7 +10,7 @@ import { saveAs } from "file-saver";
 import './Uebung1.css';
 import { parseBpmnDiagram } from '../../utils/bpmnParser';
 import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
-import Feedback from '../../components/feedback';
+import Feedback from '../../components/feedbackUebung1';
 import ReactMarkdown from 'react-markdown';
 
 const ResizableDivs = (randomNumber) => {
@@ -58,6 +58,7 @@ const ResizableDivs = (randomNumber) => {
     const [parsedDiagram, setParsedDiagram] = useState([]);
     const [solution, setSolution] = useState("");
     const [parsedSolution, setParsedSolution] = useState([]);
+    const [compareResult, setCompareResult] = useState("");
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
     const feedbackRef = useRef("");
@@ -69,24 +70,7 @@ const ResizableDivs = (randomNumber) => {
         //compareBpmnDiagrams2(xml, solution);
         setParsedDiagram(parseBpmnDiagram(xml));
         // This code will only run after setDiagram has finished updating the state
-        const compare = compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution);
-        const wrongElements = compare.mismatches;
-        const rightElements = compare.matches;
-        const elementRegistry = modelerRef.current.get('elementRegistry');
-        const modeling = modelerRef.current.get('modeling');
-        for(let e of wrongElements){
-          const element = elementRegistry.get(e.getAttribute("id"));
-          modeling.setColor(element, {
-            stroke: 'red'
-          });
-        }
-        console.log(rightElements);
-        for(let e of rightElements){
-          const element = elementRegistry.get(e.getAttribute("id"));
-          modeling.setColor(element, {
-            stroke: 'black'
-          });
-        }
+        setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution));
         
         xml = await modelerRef.current.saveXML({ format: true });
         setDiagram(xml);
@@ -133,6 +117,69 @@ const ResizableDivs = (randomNumber) => {
           console.log(err);
       }
     };
+
+    useEffect(() => {
+      if(modelerRef.current != null){
+        const elementRegistry = modelerRef.current.get('elementRegistry');
+        const modeling = modelerRef.current.get('modeling');
+
+        console.log(compareResult);
+        for(let e of compareResult.nodeNameMismatch){const element = elementRegistry.get(e.getAttribute("id"));
+          modeling.setColor(element, {
+            stroke: 'red'
+          });
+
+          const htmlElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}"]`);
+          if (htmlElement) {
+            const textElement = htmlElement.querySelector('text');
+            if (textElement) {
+              textElement.style.fill = 'black';
+            }
+          }
+
+          const htmlLabeElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}_label"]`);
+          if (htmlLabeElement) {
+            const textElement = htmlLabeElement.querySelector('text');
+            if (textElement) {
+              textElement.style.fill = 'black';
+            }
+          }
+        }
+
+        for(let e of compareResult.attrMismatch){
+          const htmlElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}"]`);
+          if (htmlElement) {
+            const textElement = htmlElement.querySelector('text');
+            if (textElement) {
+              textElement.style.fill = 'red';
+            }
+          }
+
+          const htmlLabeElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}_label"]`);
+          if (htmlLabeElement) {
+            const textElement = htmlLabeElement.querySelector('text');
+            if (textElement) {
+              textElement.style.fill = 'red';
+            }
+          }
+        }
+        
+        for(let e of compareResult.mismatches){
+          const element = elementRegistry.get(e.getAttribute("id"));
+          modeling.setColor(element, {
+            stroke: 'red'
+          });
+        }
+
+        for(let e of compareResult.matches){
+          const element = elementRegistry.get(e.getAttribute("id"));
+          modeling.setColor(element, {
+            stroke: 'black'
+          });
+        }
+      }
+        
+    }, [compareResult]);
 
     useEffect(() => {
     }, [diagram]);
@@ -196,16 +243,27 @@ const ResizableDivs = (randomNumber) => {
               <ReactMarkdown>{task}</ReactMarkdown>
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                {/* {initializeFeedback(parsedDiagram, parsedSolution)} */}
+                {initializeFeedback(parsedDiagram, parsedSolution, compareResult)}
             </div>
         </div>
       </div>
     );
   };
 
-  // function initializeFeedback(bpmnDiagram, bpmnSolution) {
-  //   let result = [];
-  //   result.push(<Feedback key={1} Header='Prozesse' UserDiagram={bpmnDiagram?.processes?.startEvents} Solution={bpmnSolution?.processes?.startEvents}/>);
+ function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
+     let result = [];
+     let wrongElementString = "Die folgenden Elemente sind nicht richtig dargestellt oder gehören nicht ins Diagram. Überprüfe nochmal " +
+                      "auf Rechtschreibfehler und ob das ausgewählte Element stimmt." + 
+                      "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                      "Position erstellt wurde.sad";
+     let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. " + 
+                                  "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                                  "Position erstellt wurde.";
+     let missingElementString = "Die folgenden Element fehlen im Diagram.";
+
+     result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={compareResult.mismatches} Matches={compareResult.matches}/>);
+     result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={compareResult.attrMismatch} Matches={compareResult.matches}/>);
+     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={compareResult.missingElements} Matches={compareResult.matches}/>);
   //   result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
   //   result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
   //   result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
@@ -213,8 +271,8 @@ const ResizableDivs = (randomNumber) => {
   //   result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
   //   result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
 
-  //   return result;
-  // }
+     return result;
+  }
   
 
 export default function App() {
