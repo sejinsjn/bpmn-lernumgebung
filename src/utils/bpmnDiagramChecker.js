@@ -4,10 +4,28 @@ function compareTree(tree1, tree2) {
             (Object.keys(nodeAttributes1).length !== 1 && Object.keys(nodeAttributes2).length === 1)) {
             mismatches.push(tree1.node);
             attrMismatch.push(tree1.node);
+
+            nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
+
+            if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
+                missingElements.push(tree2.node);
+                tree2.children.forEach(child => {
+                    
+                    let compare = compareTree(tree1, child);
+                    mismatches.push(...compare.mismatches);
+                    matches.push(...compare.matches);
+                    attrMismatch.push(...compare.attrMismatch);
+                    nodeNameMismatch.push(...compare.nodeNameMismatch);
+                    missingElements.push(...compare.missingElements);
+                });
+            } else {
+                mismatches.push(...nextMatchingElement.nonMatchingElements);
+                checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
+            }
         } else if (tree1.node.nodeName === tree2.node.nodeName) {
             matches.push(tree1.node);
+            checkChildren(tree1.children, tree2.children);
         }
-        checkChildren(tree1.children, tree2.children);
     }
     
     function handleMultipleAttributeNode(tree1, tree2) {
@@ -129,7 +147,7 @@ function findNextMatchingElement(node, children) {
                     nonMatchingElements: nonMatchingElements,
                     matchingElement: matchingChild,
                 }
-                return nextMatchingElement;
+                return nextMatchingElement; 
             }
         }
 
