@@ -1,22 +1,24 @@
 function compareTree(tree1, tree2) {
+    // Nicht alle Elemente werden ins Mismatch eingefügt wenn das Diagram gar nicht zu der Lösung passt
     function handleSingleAttributeNode(tree1, tree2) {
         if ((Object.keys(nodeAttributes1).length === 1 && Object.keys(nodeAttributes2).length !== 1) ||
             (Object.keys(nodeAttributes1).length !== 1 && Object.keys(nodeAttributes2).length === 1)) {
             mismatches.push(tree1.node);
             attrMismatch.push(tree1.node);
-
             nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
 
             if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
                 missingElements.push(tree2.node);
-                tree2.children.forEach(child => {
-                    
-                    let compare = compareTree(tree1, child);
-                    mismatches.push(...compare.mismatches);
-                    matches.push(...compare.matches);
-                    attrMismatch.push(...compare.attrMismatch);
-                    nodeNameMismatch.push(...compare.nodeNameMismatch);
-                    missingElements.push(...compare.missingElements);
+                tree2.children.forEach(child2 => {
+                    compareTree(tree1, child2);
+                    tree1.children.forEach(child1 => {
+                      let compare = compareTree(child1, child2);
+                      mismatches.push(...compare.mismatches);
+                      matches.push(...compare.matches);
+                      attrMismatch.push(...compare.attrMismatch);
+                      nodeNameMismatch.push(...compare.nodeNameMismatch);
+                      missingElements.push(...compare.missingElements);
+                    });
                 });
             } else {
                 mismatches.push(...nextMatchingElement.nonMatchingElements);
@@ -38,7 +40,6 @@ function compareTree(tree1, tree2) {
                 if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
                     missingElements.push(tree2.node);
                     tree2.children.forEach(child => {
-                        
                         let compare = compareTree(tree1, child);
                         mismatches.push(...compare.mismatches);
                         matches.push(...compare.matches);
@@ -46,6 +47,8 @@ function compareTree(tree1, tree2) {
                         nodeNameMismatch.push(...compare.nodeNameMismatch);
                         missingElements.push(...compare.missingElements);
                     });
+                    console.log(tree2.children);
+                    if(tree2.children.length === 0) console.log(tree2.node);
                     break;
                 } else {
                     mismatches.push(...nextMatchingElement.nonMatchingElements);
