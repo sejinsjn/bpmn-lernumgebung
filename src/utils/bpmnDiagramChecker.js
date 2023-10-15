@@ -192,6 +192,7 @@ function compareTrees(trees1, trees2){
 function compareParticipants(participants1, participants2) {
     const allNonMatchingElements = [];
     const allMatchingElements = [];
+    const missingElements = [];
 
     for(var j = 0; j < participants1.length; j++){
         const participant1 = participants1[j];
@@ -222,7 +223,36 @@ function compareParticipants(participants1, participants2) {
         }
     }
 
-    return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements};
+    // loop through the participants2 array and check if any element is not in participants1
+    for(var l = 0; l < participants2.length; l++){
+        const participant2 = participants2[l];
+        let isMissing = true;
+
+        for(var m = 0; m < participants1.length; m++){
+            const participant1 = participants1[m];
+            const attributes2 = participant2.attributes;
+            let isMatch = true;
+
+            for (let n = 0; n < attributes2.length; n++) {
+                const attrName = attributes2[n].name;
+                if ((attrName !== "id" || attrName !== "processRef") && participant2.getAttribute(attrName) !== participant1.getAttribute(attrName)) {
+                    isMatch = false;
+                    break;
+                }
+            }
+
+            if(isMatch){
+                isMissing = false;
+                break;
+            }
+        }
+
+        if(isMissing){
+            missingElements.push(participant2); // add the missing element to the array
+        }
+    }
+
+    return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements}; // return the new array along with the others
 }
 
 
@@ -358,6 +388,7 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     const compareParticipantsResult = compareParticipants(diagram1.collaborations.participants, diagram2.collaborations.participants)
     allNonMatchingElements.push(...compareParticipantsResult.allNonMatchingElements);
     allMatchingElements.push(...compareParticipantsResult.allMatchingElements);
+    allMissingElements.push(...compareParticipantsResult.missingElements);
 
     const compareMessageFlowsResult = compareMessageFlows(diagram1.processes.bpmnElements ,diagram1.collaborations.messageFlows, diagram2.processes.bpmnElements, diagram2.collaborations.messageFlows);
     allNonMatchingElements.push(...compareMessageFlowsResult.mismatches);

@@ -264,15 +264,7 @@ function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
     
     let missingElementString = "Die folgenden Element fehlen im Diagram.";
     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={compareResult.missingElements} Matches={compareResult.matches}/>);
-
-
-//   result.push(<Feedback key={2} Header='Anzahl der Elemente' UserDiagram={bpmnDiagram?.processes?.bpmnElements} Solution={bpmnSolution?.processes?.bpmnElements}/>);
-//   result.push(<Feedback key={3} Header='Anzahl der Verbindungen' UserDiagram={bpmnDiagram?.processes?.sequenceFlows} Solution={bpmnSolution?.processes?.sequenceFlows}/>);
-//   result.push(<Feedback key={4} Header='Anzahl der LaneSets' UserDiagram={bpmnDiagram?.processes?.laneSets} Solution={bpmnSolution?.processes?.laneSets}/>);
-//   result.push(<Feedback key={5} Header='Anzahl der SubProzesse' UserDiagram={bpmnDiagram?.processes?.subProcesses} Solution={bpmnSolution?.processes?.subProcesses}/>);
-//   result.push(<Feedback key={6} Header='Anzahl der Teilnehmer' UserDiagram={bpmnDiagram?.collaborations?.participants} Solution={bpmnSolution?.collaborations?.participants}/>);
-//   result.push(<Feedback key={7} Header='Anzahl der Nachrichten' UserDiagram={bpmnDiagram?.collaborations?.messageFlows} Solution={bpmnSolution?.collaborations?.messageFlows}/>);
-
+    
     return result;
 }
   
