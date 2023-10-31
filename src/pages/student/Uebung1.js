@@ -11,6 +11,7 @@ import './Uebung1.css';
 import { parseBpmnDiagram } from '../../utils/bpmnParser';
 import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
 import Feedback from '../../components/feedbackUebung1';
+import Beschriftungen from '../../components/beschriftungen';
 import ReactMarkdown from 'react-markdown';
 
 const ResizableDivs = (randomNumber) => {
@@ -33,8 +34,6 @@ const ResizableDivs = (randomNumber) => {
         return () => observer.disconnect();
       }, []);
     
-    // Resizing the div container via dragging the border of the right div
-    // so that the editor doesn't move the diagram while resizing
     const [activeRightDiv, setActiveRightDiv] = React.useState('task');
 
     React.useEffect(() => {
@@ -240,6 +239,8 @@ const ResizableDivs = (randomNumber) => {
             </div>
             <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
               <ReactMarkdown>{task}</ReactMarkdown>
+              Die folgenden Elemente und Beschriftungen müssen genutzt werden: <br/>
+              {initializeBeschriftungen(parsedSolution)}
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
                 {initializeFeedback(parsedDiagram, parsedSolution, compareResult)}
@@ -268,6 +269,16 @@ function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
     return result;
 }
   
+function initializeBeschriftungen(parsedSolution) {
+  let result = [];
+
+  if(parsedSolution.length === 0)
+    return <></>;
+  else
+    result.push(<Beschriftungen ParsedSolution={parsedSolution}/>);
+
+  return result;
+}
 
 export default function App() {
   const randomNumber = Math.floor(Math.random() * 2) + 1;

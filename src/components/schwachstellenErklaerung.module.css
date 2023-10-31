@@ -1,0 +1,54 @@
+.container {
+    width: 98%;
+    margin: 5px auto;
+    min-height: 40px;
+    height: auto;
+    border-radius: 5px;
+    background-color: #add8e6;
+    overflow:auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+  .input {
+    border-radius: 10px;
+    padding: 3px;
+    font-size: 16px;
+    width: 100%;
+    margin: auto;
+    min-height: 50px;
+    overflow-wrap: break-word;
+  }
+
+  .input span{
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    display: block;
+    padding: 5px;
+    border-radius: 10px;
+    border-color: black;
+    border-style: solid 1px;
+  }
+
+  .header{
+    padding: 10px;
+  }
+
+  .contentWeakness{
+    width: 96%;
+    margin: 5px;
+  }
+
+  .solutionButton{
+    width: 50%;
+    margin: 10px auto;
+    border-radius: 10px;
+    background-color: white;
+    border-color: transparent;
+  }
+
+  .solutionButton:hover{
+    background-color: lightgray;
+  }

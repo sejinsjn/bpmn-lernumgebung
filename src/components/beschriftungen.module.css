@@ -1,0 +1,45 @@
+.container {
+    width: 98%;
+    margin: 5px auto;
+    min-height: 40px;
+    height: auto;
+    border-radius: 5px;
+    background-color: #add8e6;
+    overflow:auto;
+}
+
+.container:empty{
+  display: none;
+}
+
+.header{
+  padding: 10px;
+}
+
+.content {
+    background-color: #add8e6;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+  .content p{
+    padding: 5px;
+  }
+
+  .open {
+    height: fit-content;
+  }
+  
+.feedbackElements{
+  width: 94%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-direction: row;
+  margin: 10px;
+}

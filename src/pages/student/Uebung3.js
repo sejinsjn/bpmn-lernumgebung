@@ -9,6 +9,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import ReactMarkdown from 'react-markdown';
 import interact from 'interactjs';
 import Feedback from '../../components/feedback';
+import SchwachstellenErklaerung from '../../components/schwachstellenErklaerung';
 
 var selectedElements = [];
 var xmlDiagram = "";
@@ -21,23 +22,9 @@ const ResizableDivs = (randomNumber) => {
     const [task, setTask] = useState("");
     const [vulnerabilities, setVulnerabilities] = useState("");
     const [explanations, setExplanations] = useState("");
-    const [tips, setTips] = useState("");
     const [feedback, setFeedback] = useState("");
-
+    const [isSolutionCorrect, setIsSolutionCorrect] = useState(false);
     const [data, setData] = useState(null);
-    
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const xmlContent = e.target.result;
-            setDiagram(xmlContent);
-            xmlDiagram = xmlContent;
-        };
-
-        reader.readAsText(file);
-    };
 
     const countMatchingElements = (array1, array2) => {
         let count = 0;
@@ -59,12 +46,15 @@ const ResizableDivs = (randomNumber) => {
         
         if(count === sortedArray1.length){
             setFeedback("Du hast alle Schwachstellen gefunden.");
+            setIsSolutionCorrect(true);
         }
         if(count < sortedArray1.length){
             setFeedback(`Du hast ${count}/${sortedArray1.length} Schwachstellen gefunden.`);
+            setIsSolutionCorrect(false);
         }
         if(sortedArray2.length > sortedArray1.length){
             setFeedback(`Du hast zu viele Element ausgewählt. Von diesen sind jedoch ${count} richtig`);
+            setIsSolutionCorrect(false);
         }
     };
     
@@ -99,14 +89,12 @@ const ResizableDivs = (randomNumber) => {
             fetch('/json/uebung3.json')
                 .then(response => response.json())
                 .then(jsonData => {
-                    // jsonData is the parsed JSON object received from the URL
                     const rNumber = randomNumber.randomNumber;
                     const diagramURL = jsonData[rNumber].diagram;
                     
                     setTask(jsonData[rNumber].task);
                     setExplanations(jsonData[rNumber].explanations);
                     setVulnerabilities(jsonData[rNumber].vulnerabilities);
-                    setTips(jsonData[rNumber].tips);
                     setData(jsonData);
                     
                     fetch(diagramURL)
@@ -189,6 +177,7 @@ const ResizableDivs = (randomNumber) => {
                 </div>
                 <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
                     <Feedback Header='Schwachstellen' Description={feedback}/>
+                    {isSolutionCorrect && <SchwachstellenErklaerung Explanations={explanations} />}
                 </div>
             </div>
         </div>

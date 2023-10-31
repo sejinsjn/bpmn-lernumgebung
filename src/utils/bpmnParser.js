@@ -34,6 +34,8 @@ function parseProcessElements(xpathResult){
     const sequenceFlows = new Map();
     const laneSets = [];
     const subProcesses = [];
+    const bpmnElementsArray = [];
+
 
     while(node){
         const children = node.children;
@@ -41,6 +43,7 @@ function parseProcessElements(xpathResult){
          switch(children[i].nodeName){
             case "bpmn:startEvent":
                startEvents.push(children[i]);
+               bpmnElementsArray.push(children[i]);
                bpmnElements.set(children[i].getAttribute("id"), children[i]);
                break;
             case "bpmn:sequenceFlow":
@@ -50,10 +53,12 @@ function parseProcessElements(xpathResult){
                laneSets.push(children[i]);
                break;
             case "bpmn:subProcess":
+               bpmnElementsArray.push(children[i]);
                subProcesses.push(children[i]);
                bpmnElements.set(children[i].getAttribute("id"), children[i]);
                break;
             default:
+               bpmnElementsArray.push(children[i]);
                bpmnElements.set(children[i].getAttribute("id"), children[i]);
                break;
          }
@@ -66,7 +71,8 @@ function parseProcessElements(xpathResult){
          bpmnElements: bpmnElements,
          sequenceFlows: sequenceFlows,
          laneSets: laneSets,
-         subProcesses: subProcesses
+         subProcesses: subProcesses,
+         bpmnElementsArray: bpmnElementsArray
      }
 
      return processes;

@@ -4,19 +4,7 @@ import StudentHome from "./pages/student/Home";
 import Uebung1 from "./pages/student/Uebung1";
 import Uebung3 from "./pages/student/Uebung3";
 
-/*
-import TeacherHome from "./pages/teacher/Home";
-import Editor from "./pages/teacher/Editor";
-import Viewer from "./pages/teacher/Viewer";
-import AddNewUebung3 from "./pages/teacher/AddNewUebung3";*/
-
 export default function App() {
-    /*
-    <Route path="teacher" element={<TeacherHome />} />
-    <Route path="teacher/editor" element={<Editor />} />
-    <Route path="teacher/viewer" element={<Viewer />} />
-    <Route path="teacher/addnewuebung3" element={<AddNewUebung3 />} />
-    */
     return (
         <BrowserRouter>
             <Routes>
