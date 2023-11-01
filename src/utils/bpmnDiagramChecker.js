@@ -1,4 +1,4 @@
-function compareTree(tree1, tree2) {
+function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     // Nicht alle Elemente werden ins Mismatch eingefügt wenn das Diagram gar nicht zu der Lösung passt
     function handleSingleAttributeNode(tree1, tree2) {
         if ((Object.keys(nodeAttributes1).length === 1 && Object.keys(nodeAttributes2).length !== 1) ||
@@ -10,7 +10,7 @@ function compareTree(tree1, tree2) {
             if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
                 missingElements.push(tree2.node);
                 tree2.children.forEach(child2 => {
-                    compareTree(tree1, child2);
+                    compareTree(tree1, child2, bpmnElements1, bpmnElements2);
                     tree1.children.forEach(child1 => {
                       let compare = compareTree(child1, child2);
                       mismatches.push(...compare.mismatches);
@@ -26,6 +26,7 @@ function compareTree(tree1, tree2) {
             }
         } else if (tree1.node.nodeName === tree2.node.nodeName) {
             matches.push(tree1.node);
+            checkNodeChildren(tree1.node, tree2.node)
             checkChildren(tree1.children, tree2.children);
         }
     }
@@ -40,15 +41,14 @@ function compareTree(tree1, tree2) {
                 if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
                     missingElements.push(tree2.node);
                     tree2.children.forEach(child => {
-                        let compare = compareTree(tree1, child);
+                        let compare = compareTree(tree1, child, bpmnElements1, bpmnElements2);
                         mismatches.push(...compare.mismatches);
                         matches.push(...compare.matches);
                         attrMismatch.push(...compare.attrMismatch);
                         nodeNameMismatch.push(...compare.nodeNameMismatch);
                         missingElements.push(...compare.missingElements);
                     });
-                    console.log(tree2.children);
-                    if(tree2.children.length === 0) console.log(tree2.node);
+                    
                     break;
                 } else {
                     mismatches.push(...nextMatchingElement.nonMatchingElements);
@@ -58,21 +58,60 @@ function compareTree(tree1, tree2) {
             } else if (attr !== "id" && nodeAttributes1[attr] === nodeAttributes2[attr]) {
                 matches.push(tree1.node);
                 checkChildren(tree1.children, tree2.children);
+                checkNodeChildren(tree1.node, tree2.node)
             }
         }
     }
     
-
     function checkChildren(children1, children2){
         if(children1.length !== 0 && children2.length !== 0){
             for (let i = 0; i < children1.length; i++) {
                 for (let j = 0; j < children2.length; j++) {
-                    let result = compareTree(children1[i], children2[j]);
+                    let result = compareTree(children1[i], children2[j], bpmnElements1, bpmnElements2);
                     matches.push(...result.matches);
                     mismatches.push(...result.mismatches);
                     attrMismatch.push(...result.attrMismatch);
                     missingElements.push(...result.missingElements);
                     nodeNameMismatch.push(...result.nodeNameMismatch);
+                }
+            }
+        }
+    }
+
+    function checkNodeChildren(node1, node2){
+        const children1 = node1.children;
+        const children2 = node2.children;
+
+        if(children1.length !== 0 && children2.length !== 0){
+            for (let i = 0; i < children1.length; i++) {
+                for (let j = 0; j < children2.length; j++) {
+                    if((children1[i].nodeName.includes("Input") && children2[j].nodeName.includes("Input")) || 
+                    (children1[i].nodeName.includes("Output") && children2[j].nodeName.includes("Output"))){
+
+                            let child1 = null; let child2 = null;
+
+                            child1 = bpmnElements1.get(children1[i].children[0].textContent);
+                            child2 = bpmnElements2.get(children2[j].children[0].textContent);
+
+                            let childAttributes1 = Object.fromEntries(Array.from(child1.attributes).map(attr => [attr.name, attr.value]));
+                            let childAttributes2 = Object.fromEntries(Array.from(child2.attributes).map(attr => [attr.name, attr.value]));
+
+                            let isMatch = true;
+                            for (let attr in childAttributes1) {
+                                if (attr !== "id" && attr !== "dataObjectRef" && childAttributes1[attr] !== childAttributes2[attr]) {
+                                    isMatch = false;
+                                    break; 
+                                }
+                            }
+
+                            if (isMatch) {
+                                matches.push(child1); 
+                                } else {
+                                mismatches.push(child1); 
+                                attrMismatch.push(child1);
+                            }
+
+                    }
                 }
             }
         }
@@ -187,18 +226,20 @@ function turnTreeIntoArray(tree){
     return elements;
 }
 
-function compareTrees(trees1, trees2){
+function compareTrees(diagram1, diagram2){
     const allNonMatchingElements = [];
     const allNonMatchingAttributes = [];
     const allNonMatchingNodeNames = [];
     const allMissingElements = [];
     const allMatchingElements = [];
-    
+    const trees1 = diagram1.trees;
+    const trees2 = diagram2.trees;
+
     if(trees1.length > trees2.length) allNonMatchingElements.push(...turnTreesIntoArray(trees1.splice(trees2.length)));
     if(trees2.length > trees1.length) allMissingElements.push(...turnTreesIntoArray(trees2.splice(trees1.length)));
 
     for(var i = 0; i < trees1.length; i++){
-        let compare = compareTree(trees1[i], trees2[i]);
+        let compare = compareTree(trees1[i], trees2[i], diagram1.processes.bpmnElements, diagram2.processes.bpmnElements);
         allNonMatchingElements.push(...compare.mismatches);
         allMatchingElements.push(...compare.matches);
         allNonMatchingAttributes.push(...compare.attrMismatch);
@@ -275,7 +316,6 @@ function compareParticipants(participants1, participants2) {
 
     return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements}; // return the new array along with the others
 }
-
 
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2) {
     let matchingMessageFlows = [];
@@ -399,7 +439,7 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     const allNonMatchingNodeNames = [];
     const allMissingElements = [];
 
-    const compare = compareTrees(diagram1.trees, diagram2.trees);
+    const compare = compareTrees(diagram1, diagram2);
     allNonMatchingElements.push(...compare.mismatches);
     allMatchingElements.push(...compare.matches);
     allNonMatchingAttributes.push(...compare.attrMismatch);

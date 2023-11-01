@@ -180,6 +180,9 @@ const ResizableDivs = (randomNumber) => {
     }, [compareResult]);
 
     useEffect(() => {
+      if(diagram !== ""){
+         console.log(parsedDiagram.processes.bpmnElements);
+      }
     }, [diagram]);
 
     useEffect(() => {

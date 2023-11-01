@@ -104,34 +104,34 @@ function parseCollaborationElements(xpathResult) {
     return collaborations;
  }
 
- function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {
-    if (visited.has(rootNode.getAttribute("id"))) {
+function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {
+   if (visited.has(rootNode.getAttribute("id"))) {
       // Cycle detected
       return null;
-    }
+   }
 
-    const tree = {
+   const tree = {
       node: rootNode,
       name: rootNode.nodeName,
       children: []
-    };
-  
-    visited.add(rootNode.getAttribute("id"));
-    if(rootNode !== undefined){
-        const outgoingFlows = Array.from(rootNode.getElementsByTagName("bpmn:outgoing"));
-        outgoingFlows.forEach((flow) => {
-                const flowId = flow.textContent;
-                const targetId = sequenceFlows.get(flowId).getAttribute("targetRef");
-                const subtree = createTree(bpmnElements.get(targetId), bpmnElements, sequenceFlows, visited);
-                if (subtree) {
-                    tree.children.push(subtree);
-                }
-        });
-    }
- 
-    visited.delete(rootNode.getAttribute("id"));
-    return tree;
-  }
+   };
+
+   visited.add(rootNode.getAttribute("id"));
+   if(rootNode !== undefined){
+      const outgoingFlows = Array.from(rootNode.getElementsByTagName("bpmn:outgoing"));
+      outgoingFlows.forEach((flow) => {
+               const flowId = flow.textContent;
+               const targetId = sequenceFlows.get(flowId).getAttribute("targetRef");
+               const subtree = createTree(bpmnElements.get(targetId), bpmnElements, sequenceFlows, visited);
+               if (subtree) {
+                  tree.children.push(subtree);
+               }
+      });
+   }
+
+   visited.delete(rootNode.getAttribute("id"));
+   return tree;
+}
 
 function createTrees(processes){
     let trees = [];
