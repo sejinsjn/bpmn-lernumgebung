@@ -9,59 +9,43 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
 
             if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
                 missingElements.push(tree2.node);
-                tree2.children.forEach(child2 => {
-                    compareTree(tree1, child2, bpmnElements1, bpmnElements2);
-                    tree1.children.forEach(child1 => {
-                      let compare = compareTree(child1, child2);
-                      mismatches.push(...compare.mismatches);
-                      matches.push(...compare.matches);
-                      attrMismatch.push(...compare.attrMismatch);
-                      nodeNameMismatch.push(...compare.nodeNameMismatch);
-                      missingElements.push(...compare.missingElements);
-                    });
-                });
+                checkChildren(tree1.children, tree2.children);
             } else {
                 mismatches.push(...nextMatchingElement.nonMatchingElements);
                 checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
             }
         } else if (tree1.node.nodeName === tree2.node.nodeName) {
             matches.push(tree1.node);
-            checkNodeChildren(tree1.node, tree2.node)
             checkChildren(tree1.children, tree2.children);
         }
     }
     
     function handleMultipleAttributeNode(tree1, tree2) {
+        let allMatch = true; // a flag to indicate if all attributes match
         for (let attr in nodeAttributes1) {
             if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
-                mismatches.push(tree1.node);
-                attrMismatch.push(tree1.node);
-                nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
+                allMatch = false; // set the flag to false if any attribute does not match
+                break; // exit the loop
+            }
+        }
+        if (allMatch) { // if all attributes match, add the node to matches and check children
+            matches.push(tree1.node);
+            checkChildren(tree1.children, tree2.children);
+        } else { // otherwise, add the node to mismatches and attrMismatch and find the next matching element
+            mismatches.push(tree1.node);
+            attrMismatch.push(tree1.node);
+            nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
 
-                if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
-                    missingElements.push(tree2.node);
-                    tree2.children.forEach(child => {
-                        let compare = compareTree(tree1, child, bpmnElements1, bpmnElements2);
-                        mismatches.push(...compare.mismatches);
-                        matches.push(...compare.matches);
-                        attrMismatch.push(...compare.attrMismatch);
-                        nodeNameMismatch.push(...compare.nodeNameMismatch);
-                        missingElements.push(...compare.missingElements);
-                    });
-                    
-                    break;
-                } else {
-                    mismatches.push(...nextMatchingElement.nonMatchingElements);
-                    checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
-                    break;
-                }
-            } else if (attr !== "id" && nodeAttributes1[attr] === nodeAttributes2[attr]) {
-                matches.push(tree1.node);
+            if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
+                missingElements.push(tree2.node);
                 checkChildren(tree1.children, tree2.children);
-                checkNodeChildren(tree1.node, tree2.node)
+            } else {
+                mismatches.push(...nextMatchingElement.nonMatchingElements);
+                checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
             }
         }
     }
+      
     
     function checkChildren(children1, children2){
         if(children1.length !== 0 && children2.length !== 0){
@@ -81,12 +65,12 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     function checkNodeChildren(node1, node2){
         const children1 = node1.children;
         const children2 = node2.children;
-
+        
         if(children1.length !== 0 && children2.length !== 0){
             for (let i = 0; i < children1.length; i++) {
                 for (let j = 0; j < children2.length; j++) {
                     if((children1[i].nodeName.includes("Input") && children2[j].nodeName.includes("Input")) || 
-                    (children1[i].nodeName.includes("Output") && children2[j].nodeName.includes("Output"))){
+                        (children1[i].nodeName.includes("Output") && children2[j].nodeName.includes("Output"))){
 
                             let child1 = null; let child2 = null;
 
@@ -106,11 +90,18 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
 
                             if (isMatch) {
                                 matches.push(child1); 
-                                } else {
+                            } else {
                                 mismatches.push(child1); 
                                 attrMismatch.push(child1);
                             }
-
+                    }
+                    
+                    if(!children1[i].nodeName.includes("incoming") && !children1[i].nodeName.includes("outgoing")){
+                        if(children1[i].nodeName.includes("Input") || children1[i].nodeName.includes("Output")){
+                            if(!mismatches.includes(bpmnElements1.get(children1[i].children[0].textContent))){
+                                mismatches.push(bpmnElements1.get(children1[i].children[0].textContent));
+                            }
+                        }
                     }
                 }
             }
@@ -136,6 +127,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     } else {
         handleMultipleAttributeNode(tree1, tree2);
     }
+    checkNodeChildren(tree1.node, tree2.node)
 
     return {matches: matches, mismatches: mismatches, attrMismatch: attrMismatch, nodeNameMismatch: nodeNameMismatch, missingElements: missingElements};
 }

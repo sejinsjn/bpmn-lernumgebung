@@ -67,6 +67,7 @@ const ResizableDivs = (randomNumber) => {
         let { xml } = await modelerRef.current.saveXML({ format: true });
         //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
         //compareBpmnDiagrams2(xml, solution);
+        setDiagram(xml);
         setParsedDiagram(parseBpmnDiagram(xml));
         // This code will only run after setDiagram has finished updating the state
         setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution));
@@ -76,6 +77,10 @@ const ResizableDivs = (randomNumber) => {
       } catch (err) {
         console.error(err);
       }
+    };
+
+    const clearDiagram = async () => {
+      setDiagram(modelerRef.current.createDiagram());
     };
     
     const handleFileChange = (event) => {
@@ -121,7 +126,9 @@ const ResizableDivs = (randomNumber) => {
       if(modelerRef.current != null){
         const elementRegistry = modelerRef.current.get('elementRegistry');
         const modeling = modelerRef.current.get('modeling');
-        
+
+        console.log(compareResult);
+        /*
         for(let e of compareResult.nodeNameMismatch){const element = elementRegistry.get(e.getAttribute("id"));
           modeling.setColor(element, {
             stroke: 'red'
@@ -142,8 +149,8 @@ const ResizableDivs = (randomNumber) => {
               textElement.style.fill = 'black';
             }
           }
-        }
-
+        }*/
+        /*
         for(let e of compareResult.attrMismatch){
           const htmlElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}"]`);
           if (htmlElement) {
@@ -160,7 +167,7 @@ const ResizableDivs = (randomNumber) => {
               textElement.style.fill = 'red';
             }
           }
-        }
+        }*/
         
         for(let e of compareResult.mismatches){
           const element = elementRegistry.get(e.getAttribute("id"));
@@ -228,6 +235,7 @@ const ResizableDivs = (randomNumber) => {
                 <div className="editor" ref={containerRef}></div>
             </div>
             <div className='buttonContainerLeft'>
+              <button className='buttonContainerLeftButton' onClick={() => {clearDiagram();}}>Diagram löschen</button>
               <input type="file" accept=".xml" onChange={handleFileChange} />
               <button onClick={() => handleSave("xml")}>Save as XML</button>
               <button onClick={() => handleSave("svg")}>Save as SVG</button>
