@@ -236,7 +236,6 @@ const ResizableDivs = (randomNumber) => {
               <button onClick={() => handleSave("xml")}>Save as XML</button>
               <button onClick={() => handleSave("svg")}>Save as SVG</button>
               <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Testen</button>
-              <button className='buttonContainerLeftButton'>Lösung</button>
             </div>
         </div>
         <div id="rightDiv">
@@ -284,11 +283,16 @@ function initializeFeedback(compareResult, solution) {
 
     if(filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0){
       console.log(solution);
-      result.push(<Link  to="/loesung" state={{solution}}>
-                      <button type="button" className="btn btn-info btn-lg">
-                          Loesung
-                      </button>
-                  </Link>);
+      result.push( <div className='solutionButton'>
+                      <Link onClick={(event) => {
+                            sessionStorage.setItem("solution", JSON.stringify(solution)); // Store the state in sessionStorage
+                            window.open("/loesung", "_blank"); // Open component in new tab
+                          }}>
+                          <button type="button" className="buttonContainerLeftButton">
+                              Zur L&ouml;sung
+                          </button>
+                      </Link>
+                    </div>);
     }
   }
   
