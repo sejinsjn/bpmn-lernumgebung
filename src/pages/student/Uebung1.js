@@ -58,6 +58,7 @@ const ResizableDivs = (randomNumber) => {
     const [solution, setSolution] = useState("");
     const [parsedSolution, setParsedSolution] = useState([]);
     const [compareResult, setCompareResult] = useState("");
+    const [tries, setTries] = useState(0);
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
     const feedbackRef = useRef("");
@@ -73,6 +74,9 @@ const ResizableDivs = (randomNumber) => {
         
         xml = await modelerRef.current.saveXML({ format: true });
         setDiagram(xml);
+
+        let tempTries = tries + 1;
+        setTries(tempTries);
       } catch (err) {
         console.error(err);
       }
@@ -224,7 +228,21 @@ const ResizableDivs = (randomNumber) => {
         }
     }, [parsedSolution]);
 
-    return (
+    return (<>
+      <div id="header">
+        <div className='leftHeader'>
+          <Link id="backButton" to="/">
+            <FontAwesomeIcon icon={faArrowLeft} />
+            <p id="backText">Zurück zur Startseite</p>
+          </Link>
+        </div>
+        <div  className='middleHeader'>
+          <h2 className='headerTitle'>Freies Modellieren</h2>
+        </div>
+        <div  className='rightHeader'>
+          <h5 className='headerTitle'>Versuche: {tries}</h5>
+        </div>
+      </div>
       <div id="container">
         <div id="leftDiv">
             <div id="editorContainer">
@@ -244,19 +262,22 @@ const ResizableDivs = (randomNumber) => {
                 <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
             </div>
             <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
-              <ReactMarkdown>{task}</ReactMarkdown>
+              <ReactMarkdown>{task}</ReactMarkdown><br/>
+              Die Aufgabe sollte in 5 Versuchen erledigt werden.
               Die folgenden Elemente und Beschriftungen müssen genutzt werden: <br/>
               {initializeBeschriftungen(parsedSolution)}
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                {initializeFeedback(compareResult, solution)}
+                {initializeFeedback(compareResult, solution, tries)}
             </div>
         </div>
       </div>
+    </>
+      
     );
   };
 
-function initializeFeedback(compareResult, solution) {
+function initializeFeedback(compareResult, solution, tries) {
   let result = [];
 
   if(compareResult.mismatches !== undefined){
@@ -281,8 +302,7 @@ function initializeFeedback(compareResult, solution) {
     let missingElementString = "Die folgenden Element fehlen im Diagram.";
     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={filteredMissingElements}/>);
 
-    if(filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0){
-      console.log(solution);
+    if((filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0) || tries > 5){
       result.push( <div className='solutionButton'>
                       <Link onClick={(event) => {
                             sessionStorage.setItem("solution", JSON.stringify(solution)); // Store the state in sessionStorage
@@ -315,21 +335,6 @@ export default function App() {
     //<div className="editor" ref={containerRef}></div>
     return (
         <div className="App">
-                <div id="header">
-                  <div className='leftHeader'>
-                    <Link id="backButton" to="/">
-                      <FontAwesomeIcon icon={faArrowLeft} />
-                      <p id="backText">Zurück zur Startseite</p>
-                    </Link>
-                  </div>
-                  <div  className='middleHeader'>
-                    <h2 className='headerTitle'>Freies Modellieren</h2>
-                  </div>
-                  <div  className='rightHeader'>
-                    
-                  </div>
-                  
-                </div>
                 <ResizableDivs randomNumber={randomNumber}/>
         </div>
     );

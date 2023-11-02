@@ -157,6 +157,12 @@
   flex-direction: column;
 }
 
+.rightHeader{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
 .headerTitle{
   text-align: center;
 }
