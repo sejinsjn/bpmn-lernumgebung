@@ -15,8 +15,13 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                 checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
             }
         } else if (tree1.node.nodeName === tree2.node.nodeName) {
-            matches.push(tree1.node);
-            checkChildren(tree1.children, tree2.children);
+            if(checkStartEventType(tree1, tree2)){
+                matches.push(tree1.node);
+                checkChildren(tree1.children, tree2.children);
+            }else{
+                mismatches.push(tree1.node);
+                checkChildren(tree1.children, tree2.children);
+            }
         }
     }
     
@@ -28,6 +33,13 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                 break; // exit the loop
             }
         }
+        
+        if(tree1.node.nodeName.includes("Event")){
+            if(tree1.node.nodeName === tree2.node.nodeName){
+                allMatch = checkStartEventType(tree1, tree2);
+            }
+        }
+        
         if (allMatch) { // if all attributes match, add the node to matches and check children
             matches.push(tree1.node);
             checkChildren(tree1.children, tree2.children);
@@ -47,6 +59,26 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     }
       
     
+    function checkStartEventType(tree1, tree2) {
+        let children1Array = Array.from(tree1.node.children);
+        let children2Array = Array.from(tree2.node.children);
+
+        let match1 = children1Array.find(
+            (child1) => child1.nodeName.includes("Definition")
+        );
+
+        let match2 = children2Array.find(
+            (child2) => child2.nodeName.includes("Definition")
+        );
+
+        if((!match1 && match2) || (match1 && !match2)){
+            return false;
+        }
+        
+        return true;
+    }
+      
+
     function checkChildren(children1, children2){
         if(children1.length !== 0 && children2.length !== 0){
             for (let i = 0; i < children1.length; i++) {

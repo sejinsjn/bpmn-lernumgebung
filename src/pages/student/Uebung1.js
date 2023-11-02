@@ -67,7 +67,6 @@ const ResizableDivs = (randomNumber) => {
         let { xml } = await modelerRef.current.saveXML({ format: true });
         //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
         //compareBpmnDiagrams2(xml, solution);
-        setDiagram(xml);
         setParsedDiagram(parseBpmnDiagram(xml));
         // This code will only run after setDiagram has finished updating the state
         setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution));

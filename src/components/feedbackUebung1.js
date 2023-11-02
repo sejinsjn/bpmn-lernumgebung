@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 const Feedback = ({Header = "", Description = "", Elements = [], Matches = []}) => {
   const [showContent, setShowContent] = useState(true);
 
+  console.log(Elements);
+  console.log(Matches);
   const filteredElements = Elements.filter(element => !Matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
   .reduce((unique, item) => 
     unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
