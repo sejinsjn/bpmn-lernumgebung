@@ -186,10 +186,7 @@ const ResizableDivs = (randomNumber) => {
     }, [compareResult]);
 
     useEffect(() => {
-      if(diagram !== ""){
-         console.log(parsedDiagram.processes.bpmnElements);
-      }
-    }, [diagram]);
+    }, [diagram, solution]);
 
     useEffect(() => {
       fetch('/json/uebung1.json')
@@ -253,30 +250,49 @@ const ResizableDivs = (randomNumber) => {
               {initializeBeschriftungen(parsedSolution)}
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                {initializeFeedback(parsedDiagram, parsedSolution, compareResult)}
+                {initializeFeedback(compareResult, solution)}
             </div>
         </div>
       </div>
     );
   };
 
-function initializeFeedback(bpmnDiagram, bpmnSolution, compareResult) {
-    let result = [];
+function initializeFeedback(compareResult, solution) {
+  let result = [];
+
+  if(compareResult.mismatches !== undefined){
+    const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
+    .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
+
     let wrongElementString = "Die folgenden Elemente sind nicht richtig dargestellt oder gehören nicht ins Diagram. Überprüfe nochmal " +
-                    "auf Rechtschreibfehler und ob das ausgewählte Element stimmt.\n" + 
-                    "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
-                    "Position erstellt wurde.";
-    result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={compareResult.mismatches} Matches={compareResult.matches}/>);
-    
+                              "auf Rechtschreibfehler und ob das ausgewählte Element stimmt.\n" + 
+                              "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                              "Position erstellt wurde.";
+    result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={filteredElements}/>);
+
+    const filteredElementNames = compareResult.attrMismatch.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
+      .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
     let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. " + 
-                                "\nHinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
-                                "Position erstellt wurde.";
-    result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={compareResult.attrMismatch} Matches={compareResult.matches}/>);
-    
+                                  "\nHinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
+                                  "Position erstellt wurde.";
+    result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={filteredElementNames}/>);
+
+    const filteredMissingElements = compareResult.missingElements.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
+      .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
     let missingElementString = "Die folgenden Element fehlen im Diagram.";
-    result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={compareResult.missingElements} Matches={compareResult.matches}/>);
-    
-    return result;
+    result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={filteredMissingElements}/>);
+
+    if(filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0){
+      console.log(solution);
+      result.push(<Link  to="/loesung" state={{solution}}>
+                      <button type="button" className="btn btn-info btn-lg">
+                          Loesung
+                      </button>
+                  </Link>);
+    }
+  }
+  
+  return result;
 }
   
 function initializeBeschriftungen(parsedSolution) {

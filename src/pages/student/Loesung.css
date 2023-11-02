@@ -1,0 +1,18 @@
+:root, body, html{
+    height: 100%;
+    width: 100%;
+}
+
+.App{
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex-direction: column;
+}
+
+#viewerContainer, .viewer{
+    height: 100vh;
+    width: 100vw;
+}
