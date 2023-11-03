@@ -243,7 +243,7 @@ const ResizableDivs = (randomNumber) => {
               {initializeBeschriftungen(parsedSolution)}
             </div>
             <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} ref={feedbackRef}>
-                {initializeFeedback(compareResult, solution, tries)}
+                {initializeFeedback(parsedDiagram, compareResult, solution, tries)}
             </div>
         </div>
       </div>
@@ -252,10 +252,18 @@ const ResizableDivs = (randomNumber) => {
     );
   };
 
-function initializeFeedback(compareResult, solution, tries) {
+function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
   let result = [];
 
-  if(compareResult.mismatches !== undefined){
+  if(compareResult.mismatches !== undefined && parsedDiagram !== undefined){
+    const elementsWithoutConnections = parsedDiagram.processes.bpmnElementsArray.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element))
+    .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
+
+    elementsWithoutConnections.forEach(element => {
+      compareResult.mismatches.push(parsedDiagram.processes.bpmnElements.get(element.getAttribute("id")));
+    });
+   
+
     const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
     .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
 
