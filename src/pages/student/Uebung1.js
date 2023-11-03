@@ -13,6 +13,8 @@ import { compareBpmnDiagrams2 } from '../../utils/bpmnDiagramChecker';
 import Feedback from '../../components/feedbackUebung1';
 import Beschriftungen from '../../components/beschriftungen';
 import ReactMarkdown from 'react-markdown';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css'
 
 const ResizableDivs = (randomNumber) => {
     React.useEffect(() => {
@@ -62,6 +64,7 @@ const ResizableDivs = (randomNumber) => {
     const containerRef = useRef(null);
     const modelerRef = useRef(null);
     const feedbackRef = useRef("");
+    const [isOpen, setIsOpen] = useState(false);
 
     const checkIfSame = async () => {
       try {
@@ -131,47 +134,7 @@ const ResizableDivs = (randomNumber) => {
         const modeling = modelerRef.current.get('modeling');
 
         console.log(compareResult);
-        /*
-        for(let e of compareResult.nodeNameMismatch){const element = elementRegistry.get(e.getAttribute("id"));
-          modeling.setColor(element, {
-            stroke: 'red'
-          });
 
-          const htmlElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}"]`);
-          if (htmlElement) {
-            const textElement = htmlElement.querySelector('text');
-            if (textElement) {
-              textElement.style.fill = 'black';
-            }
-          }
-
-          const htmlLabeElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}_label"]`);
-          if (htmlLabeElement) {
-            const textElement = htmlLabeElement.querySelector('text');
-            if (textElement) {
-              textElement.style.fill = 'black';
-            }
-          }
-        }*/
-        /*
-        for(let e of compareResult.attrMismatch){
-          const htmlElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}"]`);
-          if (htmlElement) {
-            const textElement = htmlElement.querySelector('text');
-            if (textElement) {
-              textElement.style.fill = 'red';
-            }
-          }
-
-          const htmlLabeElement = document.querySelector(`[data-element-id="${e.getAttribute("id")}_label"]`);
-          if (htmlLabeElement) {
-            const textElement = htmlLabeElement.querySelector('text');
-            if (textElement) {
-              textElement.style.fill = 'red';
-            }
-          }
-        }*/
-        
         for(let e of compareResult.mismatches){
           const element = elementRegistry.get(e.getAttribute("id"));
           modeling.setColor(element, {
@@ -190,7 +153,13 @@ const ResizableDivs = (randomNumber) => {
     }, [compareResult]);
 
     useEffect(() => {
-    }, [diagram, solution]);
+    }, [diagram, solution, isOpen]);
+    
+    useEffect(() => {
+      if(tries === 5){
+        setIsOpen(true);
+      } 
+    }, [tries]);
 
     useEffect(() => {
       fetch('/json/uebung1.json')
@@ -253,6 +222,12 @@ const ResizableDivs = (randomNumber) => {
               <input type="file" accept=".xml" onChange={handleFileChange} />
               <button onClick={() => handleSave("xml")}>Save as XML</button>
               <button onClick={() => handleSave("svg")}>Save as SVG</button>
+              <Popup open={isOpen} onClose={() => setIsOpen(false)} position="right center">
+                <div className='popupContent'>
+                  Bisher hatten Sie schon fünf Versuche. Den Weg zur Lösung finden Sie unter dem Feedback/Ergebnis
+                  <button className='closePopupButton' onClick={() => setIsOpen(false)}>Close</button>
+                </div>
+              </Popup>
               <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Testen</button>
             </div>
         </div>
@@ -302,7 +277,7 @@ function initializeFeedback(compareResult, solution, tries) {
     let missingElementString = "Die folgenden Element fehlen im Diagram.";
     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={filteredMissingElements}/>);
 
-    if((filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0) || tries > 5){
+    if((filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0) || tries >= 5){
       result.push( <div className='solutionButton'>
                       <Link onClick={(event) => {
                             sessionStorage.setItem("solution", JSON.stringify(solution)); // Store the state in sessionStorage

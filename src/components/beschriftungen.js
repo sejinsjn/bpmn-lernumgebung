@@ -9,6 +9,7 @@ const Beschriftungen = ({ParsedSolution}) => {
           <div className={styles.feedbackElements}>
             {ParsedSolution.processes.bpmnElementsArray.map((item, index) => (
               item.getAttribute('name') && <div key={index} style={{border: '1px solid black', textAlign: 'center', margin: '5px auto', borderRadius: '20px', fontSize: '14px', padding: '5px'}}>
+                <p style={{margin: '0'}}>{item.nodeName.replace("bpmn:", "")}</p>
                 <p style={{margin: '0'}}>{item.getAttribute('name')}</p>
               </div>
             ))}
@@ -19,6 +20,7 @@ const Beschriftungen = ({ParsedSolution}) => {
           <div className={styles.feedbackElements}>
             {ParsedSolution.processes.laneSets.map((item, index) => (
               item.getAttribute('name') && <div key={index} style={{border: '1px solid black', textAlign: 'center', margin: '5px auto', borderRadius: '20px', fontSize: '14px', padding: '5px'}}>
+                <p style={{margin: '0'}}>{item.nodeName.replace("bpmn:", "")}</p>
                 <p style={{margin: '0'}}>{item.getAttribute('name')}</p>
               </div>
             ))}
@@ -29,6 +31,7 @@ const Beschriftungen = ({ParsedSolution}) => {
           <div className={styles.feedbackElements}>
             {ParsedSolution.collaborations.participants.map((item, index) => (
               item.getAttribute('name') && <div key={index} style={{border: '1px solid black', textAlign: 'center', margin: '5px auto', borderRadius: '20px', fontSize: '14px', padding: '5px'}}>
+                <p style={{margin: '0'}}>{item.nodeName.replace("bpmn:", "")}</p>
                 <p style={{margin: '0'}}>{item.getAttribute('name')}</p>
               </div>
             ))}

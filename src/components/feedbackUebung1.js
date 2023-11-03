@@ -32,7 +32,7 @@ const Feedback = ({Header = "", Description = "", Elements = []}) => {
         <div className={styles.feedbackElements}>
           {Elements.map((item, index) => (
             <div key={index} style={{border: '1px solid black', textAlign: 'center', margin: '5px auto', borderRadius: '20px', fontSize: '14px'}}>
-              <p style={{margin: '0'}}>{item.nodeName}</p>
+              <p style={{margin: '0'}}>{item.nodeName.replace("bpmn:", "")}</p>
               <p style={{margin: '0'}}>{item.getAttribute('name')}</p>
             </div>
           ))}

@@ -15,11 +15,6 @@ const StudentHome = () => {
                     Übung 3
                 </button>
             </Link>
-            <Link to="https://camunda.com/bpmn/examples/">
-                <button type="button" className="btn btn-info btn-lg">
-                    BPMN Beispiele
-                </button>
-            </Link>
         </div>
     );
 };

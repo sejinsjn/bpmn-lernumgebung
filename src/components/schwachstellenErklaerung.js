@@ -9,7 +9,7 @@ const Erklaerung = ({Explanations}) => {
 
     // create a function to toggle the solution visibility
     const handleShowSolution = () => {
-    setShowSolution(!showSolution);
+        setShowSolution(!showSolution);
     };
 
     return (
@@ -19,7 +19,7 @@ const Erklaerung = ({Explanations}) => {
                 <div key={index} className={styles.contentWeakness}>
                     <p className={styles.header}>Schwachstelle {index + 1}</p>
                     <div className={styles.input}>
-                        <span contenteditable="true"/>
+                        <span contentEditable="true"/>
                     </div>
                 </div>
             ))}

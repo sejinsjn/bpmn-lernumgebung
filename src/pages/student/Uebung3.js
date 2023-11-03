@@ -10,9 +10,9 @@ import ReactMarkdown from 'react-markdown';
 import interact from 'interactjs';
 import Feedback from '../../components/feedback';
 import SchwachstellenErklaerung from '../../components/schwachstellenErklaerung';
+import { parseBpmnDiagram } from '../../utils/bpmnParser';
 
 var selectedElements = [];
-var xmlDiagram = "";
 
 const ResizableDivs = (randomNumber) => {
     const containerRef = useRef(null);
@@ -53,7 +53,7 @@ const ResizableDivs = (randomNumber) => {
             setIsSolutionCorrect(false);
         }
         if(sortedArray2.length > sortedArray1.length){
-            setFeedback(`Du hast zu viele Element ausgewählt. Von diesen sind jedoch ${count} richtig`);
+            setFeedback(`Du hast ${count}/${sortedArray1.length} Schwachstellen gefunden. Jedoch has du zu viele Element ausgewählt.`);
             setIsSolutionCorrect(false);
         }
     };
@@ -127,8 +127,7 @@ const ResizableDivs = (randomNumber) => {
                         selectedElements.splice(index, 1);
                     }
                 }else{
-                    if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent'  && type !== 'bpmn:Collaboration') {
-                        console.log(type);
+                    if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent'  && type !== 'bpmn:Collaboration' && type !== 'bpmn:sequenceFlow') {
                         canvas.addMarker(id, 'highlight');
                         selectedElements.push(id);
                     }
@@ -152,8 +151,6 @@ const ResizableDivs = (randomNumber) => {
     }, [diagram, data]);
 
     useEffect(() => {
-        // This code will run after the `feedback` state has been updated
-        console.log(feedback);
       }, [feedback]);
 
     return (
@@ -177,7 +174,7 @@ const ResizableDivs = (randomNumber) => {
                 </div>
                 <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
                     <Feedback Header='Schwachstellen' Description={feedback}/>
-                    {isSolutionCorrect && <SchwachstellenErklaerung Explanations={explanations} />}
+                    {isSolutionCorrect && <SchwachstellenErklaerung Explanations={explanations}/>}
                 </div>
             </div>
         </div>

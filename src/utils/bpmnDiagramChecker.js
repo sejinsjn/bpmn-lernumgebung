@@ -44,7 +44,6 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
             matches.push(tree1.node);
             checkChildren(tree1.children, tree2.children);
         } else { // otherwise, add the node to mismatches and attrMismatch and find the next matching element
-            mismatches.push(tree1.node);
             attrMismatch.push(tree1.node);
             nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
 
