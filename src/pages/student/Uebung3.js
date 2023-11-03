@@ -10,7 +10,6 @@ import ReactMarkdown from 'react-markdown';
 import interact from 'interactjs';
 import Feedback from '../../components/feedback';
 import SchwachstellenErklaerung from '../../components/schwachstellenErklaerung';
-import { parseBpmnDiagram } from '../../utils/bpmnParser';
 
 var selectedElements = [];
 

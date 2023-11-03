@@ -69,12 +69,9 @@ const ResizableDivs = (randomNumber) => {
     const checkIfSame = async () => {
       try {
         let { xml } = await modelerRef.current.saveXML({ format: true });
-        //feedbackRef.current.textContent = compareBpmnDiagrams(xml, solution);
-        //compareBpmnDiagrams2(xml, solution);
         setParsedDiagram(parseBpmnDiagram(xml));
-        // This code will only run after setDiagram has finished updating the state
         setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution));
-        
+
         xml = await modelerRef.current.saveXML({ format: true });
         setDiagram(xml);
 
@@ -130,12 +127,13 @@ const ResizableDivs = (randomNumber) => {
 
     useEffect(() => {
       if(modelerRef.current != null){
+        compareResult.mismatches = compareResult.mismatches.filter(element => element.nodeName !== ("bpmn:dataObject"));
+        
         const elementRegistry = modelerRef.current.get('elementRegistry');
         const modeling = modelerRef.current.get('modeling');
 
-        console.log(compareResult);
-
         for(let e of compareResult.mismatches){
+          console.log(e);
           const element = elementRegistry.get(e.getAttribute("id"));
           modeling.setColor(element, {
             stroke: 'red'
@@ -195,6 +193,7 @@ const ResizableDivs = (randomNumber) => {
             setDiagram(modelerRef.current.createDiagram());
             setParsedDiagram(parseBpmnDiagram(diagram));
         }
+
     }, [parsedSolution]);
 
     return (<>
@@ -262,7 +261,6 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
     elementsWithoutConnections.forEach(element => {
       compareResult.mismatches.push(parsedDiagram.processes.bpmnElements.get(element.getAttribute("id")));
     });
-   
 
     const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
     .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
