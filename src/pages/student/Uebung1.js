@@ -133,7 +133,6 @@ const ResizableDivs = (randomNumber) => {
         const modeling = modelerRef.current.get('modeling');
 
         for(let e of compareResult.mismatches){
-          console.log(e);
           const element = elementRegistry.get(e.getAttribute("id"));
           modeling.setColor(element, {
             stroke: 'red'
@@ -312,7 +311,7 @@ function initializeBeschriftungen(parsedSolution) {
 }
 
 export default function App() {
-  const randomNumber = Math.floor(Math.random() * 2) + 1;
+  const randomNumber = Math.floor(Math.random() * 3) + 1;
     //<div className="editor" ref={containerRef}></div>
     return (
         <div className="App">

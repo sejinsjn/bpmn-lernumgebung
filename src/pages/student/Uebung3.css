@@ -2,6 +2,10 @@
     fill: green !important; /* color elements as green */
 }
 
+.highlightWrong:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: red !important; /* color elements as green */
+}
+
 :root, body, html{
     height: 100%;
     width: 100%;

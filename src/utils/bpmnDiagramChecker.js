@@ -27,16 +27,17 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     
     function handleMultipleAttributeNode(tree1, tree2) {
         let allMatch = true; // a flag to indicate if all attributes match
-        for (let attr in nodeAttributes1) {
-            if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
-                allMatch = false; // set the flag to false if any attribute does not match
-                break; // exit the loop
-            }
-        }
         
         if(tree1.node.nodeName.includes("Event")){
             if(tree1.node.nodeName === tree2.node.nodeName){
                 allMatch = checkStartEventType(tree1, tree2);
+            }
+        }
+        
+        for (let attr in nodeAttributes1) {
+            if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
+                allMatch = false; // set the flag to false if any attribute does not match
+                break; // exit the loop
             }
         }
         
@@ -73,8 +74,19 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
         if((!match1 && match2) || (match1 && !match2)){
             return false;
         }
+
+        if(match1 && match2){
+            if(match1.nodeName === match2.nodeName){
+                console.log(match1.nodeName);
+                return true;
+            }
+        }
+
+        if(!match1 && !match2){
+            return true;
+        }
         
-        return true;
+        return false;
     }
       
 

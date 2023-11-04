@@ -6,6 +6,7 @@ import './Uebung3.css';
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { parseBpmnDiagram } from '../../utils/bpmnParser';
 import ReactMarkdown from 'react-markdown';
 import interact from 'interactjs';
 import Feedback from '../../components/feedback';
@@ -24,14 +25,18 @@ const ResizableDivs = (randomNumber) => {
     const [feedback, setFeedback] = useState("");
     const [isSolutionCorrect, setIsSolutionCorrect] = useState(false);
     const [data, setData] = useState(null);
+    const [parsedDiagram, setParsedDiagram] = useState(null);
 
     const countMatchingElements = (array1, array2) => {
         let count = 0;
-        for (let i = 0; i < array1.length; i++) {
-            for (let j = 0; j < array2.length; j++) {
-                if (array1[i] === array2[j]) {
-                    count++;
-                }
+
+        for (let i = 0; i < array2.length; i++) {
+            if(array1.includes(array2[i])){
+                count++;
+            }else{
+                var canvas = viewerRef.current.get('canvas');
+                canvas.removeMarker(array2[i], "highlight");
+                canvas.addMarker(array2[i], 'highlightWrong');
             }
         }
         return count;
@@ -99,6 +104,7 @@ const ResizableDivs = (randomNumber) => {
                     fetch(diagramURL)
                     .then(response => response.text())
                     .then(data => {
+                        setParsedDiagram(parseBpmnDiagram(data));
                         setDiagram(data);
                     })
                     .catch(error => {
@@ -118,6 +124,7 @@ const ResizableDivs = (randomNumber) => {
                 
                 var canvas = viewerRef.current.get('canvas');
                 var hasMarker = canvas.hasMarker(id, "highlight");
+                var hasMarkerWrong = canvas.hasMarker(id, "highlightWrong");
 
                 if(hasMarker){
                     canvas.removeMarker(id, "highlight");
@@ -126,9 +133,17 @@ const ResizableDivs = (randomNumber) => {
                         selectedElements.splice(index, 1);
                     }
                 }else{
-                    if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent'  && type !== 'bpmn:Collaboration' && type !== 'bpmn:sequenceFlow') {
-                        canvas.addMarker(id, 'highlight');
-                        selectedElements.push(id);
+                    if(hasMarkerWrong){
+                        canvas.removeMarker(id, "highlightWrong");
+                        var index = selectedElements.indexOf(id);
+                        if (id !== -1) {
+                            selectedElements.splice(index, 1);
+                        }
+                    }else{
+                        if (type !== 'bpmn:Process' && type !== 'bpmn:StartEvent' && type !== 'bpmn:EndEvent'  && type !== 'bpmn:Collaboration' && type !== 'bpmn:sequenceFlow') {
+                            canvas.addMarker(id, 'highlight');
+                            selectedElements.push(id);
+                        }
                     }
                 }
                 //output for the console
@@ -150,7 +165,7 @@ const ResizableDivs = (randomNumber) => {
     }, [diagram, data]);
 
     useEffect(() => {
-      }, [feedback]);
+      }, [feedback, parsedDiagram]);
 
     return (
         <div id="container">
@@ -173,7 +188,7 @@ const ResizableDivs = (randomNumber) => {
                 </div>
                 <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
                     <Feedback Header='Schwachstellen' Description={feedback}/>
-                    {isSolutionCorrect && <SchwachstellenErklaerung Explanations={explanations}/>}
+                    {isSolutionCorrect && <SchwachstellenErklaerung Vulnerabilities={vulnerabilities} Explanations={explanations} ParsedDiagram={parsedDiagram}/>}
                 </div>
             </div>
         </div>

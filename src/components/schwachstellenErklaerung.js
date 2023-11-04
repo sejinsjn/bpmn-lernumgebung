@@ -1,7 +1,7 @@
 import styles from './schwachstellenErklaerung.module.css';
 import React, { useState, useEffect, useRef } from 'react';
 
-const Erklaerung = ({Explanations}) => {
+const Erklaerung = ({Vulnerabilities, Explanations, ParsedDiagram}) => {
     const [showSolution, setShowSolution] = useState(false);
     const [value, setValue] = useState('');
 
@@ -18,6 +18,7 @@ const Erklaerung = ({Explanations}) => {
             {Explanations.map((explanation, index) => (
                 <div key={index} className={styles.contentWeakness}>
                     <p className={styles.header}>Schwachstelle {index + 1}</p>
+                    <p className={styles.header}>{ParsedDiagram.processes.bpmnElements.get(Vulnerabilities[index]).getAttribute("name")}</p>
                     <div className={styles.input}>
                         <span contentEditable="true"/>
                     </div>
@@ -34,6 +35,7 @@ const Erklaerung = ({Explanations}) => {
                 <div key={index} className={styles.container}>
                     <div key={index} className={styles.content}>
                         <p className={styles.header} style={{margin: '0'}}>Schwachstelle {index + 1}</p>
+                        <p className={styles.header}>{ParsedDiagram.processes.bpmnElements.get(Vulnerabilities[index]).getAttribute("name")}</p>
                         <p className={styles.header}>{explanation}</p>
                     </div>
                 </div>
