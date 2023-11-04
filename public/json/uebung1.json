@@ -13,5 +13,10 @@
         "task": "**Arzttermin** ",
         "diagram": "/xml/Arzttermin.xml",
         "tips": ""
+    },
+    "4": {
+        "task": "**Prüfungsablauf** ",
+        "diagram": "/xml/Prüfungsablauf.xml",
+        "tips": ""
     } 
 }

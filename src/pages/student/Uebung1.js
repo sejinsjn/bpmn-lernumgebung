@@ -270,6 +270,8 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
       compareResult.mismatches.push(parsedDiagram.processes.bpmnElements.get(element.getAttribute("id")));
     });
 
+    compareResult.mismatches = compareResult.mismatches.filter(element => element.nodeName !== ("bpmn:dataObject"));
+
     const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
     .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
 
@@ -281,14 +283,12 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
 
     const filteredElementNames = compareResult.attrMismatch.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
       .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
-    let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. " + 
-                                  "\nHinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
-                                  "Position erstellt wurde.";
+    let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. ";
     result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={filteredElementNames}/>);
 
     const filteredMissingElements = compareResult.missingElements.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
       .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
-    let missingElementString = "Die folgenden Element fehlen im Diagram.";
+    let missingElementString = "Die folgenden Elemente fehlen im Diagram.";
     result.push(<Feedback key={3} Header='Nicht im Diagram enthaltene Diagramme' Description={missingElementString} Elements={filteredMissingElements}/>);
 
     if((filteredElements.length === 0 && filteredElementNames.length === 0 && filteredMissingElements.length === 0) || tries >= 5){
