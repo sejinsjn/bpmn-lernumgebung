@@ -26,6 +26,8 @@ const ResizableDivs = (randomNumber) => {
     const [isSolutionCorrect, setIsSolutionCorrect] = useState(false);
     const [data, setData] = useState(null);
     const [parsedDiagram, setParsedDiagram] = useState(null);
+    const [jsonLoaded, setJsonLoaded] = useState(false);
+    const [taskNumber, setTaskNumber] = useState(0);
 
     const countMatchingElements = (array1, array2) => {
         let count = 0;
@@ -93,12 +95,19 @@ const ResizableDivs = (randomNumber) => {
             fetch('/json/uebung3.json')
                 .then(response => response.json())
                 .then(jsonData => {
-                    const rNumber = randomNumber.randomNumber;
-                    const diagramURL = jsonData[rNumber].diagram;
+                    let randomNumber;
+                    if(!jsonLoaded){
+                        randomNumber = Math.floor(Math.random() * Object.keys(jsonData).length) + 1;
+                        setTaskNumber(randomNumber);
+                        setJsonLoaded(true);
+                    }else{
+                        randomNumber = taskNumber;
+                    }
+                    const diagramURL = jsonData[randomNumber].diagram;
                     
-                    setTask(jsonData[rNumber].task);
-                    setExplanations(jsonData[rNumber].explanations);
-                    setVulnerabilities(jsonData[rNumber].vulnerabilities);
+                    setTask(jsonData[randomNumber].task);
+                    setExplanations(jsonData[randomNumber].explanations);
+                    setVulnerabilities(jsonData[randomNumber].vulnerabilities);
                     setData(jsonData);
                     
                     fetch(diagramURL)
@@ -196,8 +205,6 @@ const ResizableDivs = (randomNumber) => {
 }
 
 export default function App() {
-    const randomNumber = Math.floor(Math.random() * 3) + 1;
-      //<div className="editor" ref={containerRef}></div>
       return (
           <div className="App">
                   <div id="header">
@@ -214,7 +221,7 @@ export default function App() {
                       
                     </div>
                   </div>
-                <ResizableDivs randomNumber={randomNumber}/>
+                <ResizableDivs/>
           </div>
       );
   }

@@ -16,7 +16,7 @@ import ReactMarkdown from 'react-markdown';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css'
 
-const ResizableDivs = (randomNumber) => {
+const ResizableDivs = () => {
     React.useEffect(() => {
         var observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
@@ -65,6 +65,8 @@ const ResizableDivs = (randomNumber) => {
     const modelerRef = useRef(null);
     const feedbackRef = useRef("");
     const [isOpen, setIsOpen] = useState(false);
+    const [jsonLoaded, setJsonLoaded] = useState(false);
+    const [taskNumber, setTaskNumber] = useState(0);
 
     const checkIfSame = async () => {
       try {
@@ -162,10 +164,17 @@ const ResizableDivs = (randomNumber) => {
       fetch('/json/uebung1.json')
         .then(response => response.json())
         .then(jsonData => {
-          // jsonData is the parsed JSON object received from the URL
-          const rNumber = randomNumber.randomNumber;
-          const diagramURL = jsonData[rNumber].diagram;
-          setTask(jsonData[rNumber].task);
+          let randomNumber;
+          if(!jsonLoaded){
+            randomNumber = Math.floor(Math.random() * Object.keys(jsonData).length) + 1;
+            setTaskNumber(randomNumber);
+            setJsonLoaded(true);
+          }else{
+            randomNumber = taskNumber;
+          }
+
+          const diagramURL = jsonData[randomNumber].diagram;
+          setTask(jsonData[randomNumber].task);
 
           fetch(diagramURL)
             .then(response => response.text())
@@ -311,11 +320,10 @@ function initializeBeschriftungen(parsedSolution) {
 }
 
 export default function App() {
-  const randomNumber = Math.floor(Math.random() * 3) + 1;
     //<div className="editor" ref={containerRef}></div>
     return (
         <div className="App">
-                <ResizableDivs randomNumber={randomNumber}/>
+                <ResizableDivs/>
         </div>
     );
 }
