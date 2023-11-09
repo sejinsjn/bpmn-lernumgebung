@@ -32,6 +32,8 @@ export default function Loesung() {
                 console.log("Error", err);
             });
     }
+
+    sessionStorage.clear();
 }, [diagram]);
 
 

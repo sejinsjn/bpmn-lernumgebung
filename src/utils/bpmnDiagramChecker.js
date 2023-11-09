@@ -291,65 +291,41 @@ function compareParticipants(participants1, participants2) {
     const allMatchingElements = [];
     const missingElements = [];
 
+
     for(var j = 0; j < participants1.length; j++){
+        let matchFound = false; // flag variable
         const participant1 = participants1[j];
-        let isMatchFound = false;
+        const attributes1 = Object.fromEntries(Array.from(participant1.attributes).map(attr => [attr.name, attr.value]));
 
         for(var k = 0; k < participants2.length; k++){
             const participant2 = participants2[k];
-            const attributes1 = participant1.attributes;
-            let isMatch = true;
+            const attributes2 = Object.fromEntries(Array.from(participant2.attributes).map(attr => [attr.name, attr.value]));
 
-            for (let i = 0; i < attributes1.length; i++) {
-                const attrName = attributes1[i].name;
-                if ((attrName !== "id" || attrName !== "processRef") && participant1.getAttribute(attrName) !== participant2.getAttribute(attrName)) {
+            // compare attributes except id
+            let isMatch = true;
+            for (let attr in attributes1) {
+                if (attr !== "id" && attr !== "processRef" &&attributes1[attr] !== attributes2[attr]) {
                     isMatch = false;
-                    break;
+                    break; 
                 }
             }
 
+            // if match found, add to matching array and set flag to true
             if(isMatch){
-                isMatchFound = true;
                 allMatchingElements.push(participant1);
+                matchFound = true;
                 break;
             }
         }
 
-        if(!isMatchFound){
+        // if no match found, add to non-matching array
+        if(!matchFound){
             allNonMatchingElements.push(participant1);
         }
     }
 
-    // loop through the participants2 array and check if any element is not in participants1
-    for(var l = 0; l < participants2.length; l++){
-        const participant2 = participants2[l];
-        let isMissing = true;
 
-        for(var m = 0; m < participants1.length; m++){
-            const participant1 = participants1[m];
-            const attributes2 = participant2.attributes;
-            let isMatch = true;
-
-            for (let n = 0; n < attributes2.length; n++) {
-                const attrName = attributes2[n].name;
-                if ((attrName !== "id" || attrName !== "processRef") && participant2.getAttribute(attrName) !== participant1.getAttribute(attrName)) {
-                    isMatch = false;
-                    break;
-                }
-            }
-
-            if(isMatch){
-                isMissing = false;
-                break;
-            }
-        }
-
-        if(isMissing){
-            missingElements.push(participant2); // add the missing element to the array
-        }
-    }
-
-    return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements}; // return the new array along with the others
+    return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements};
 }
 
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2) {
@@ -493,6 +469,8 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     const compareLanesResult = compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets);
     allNonMatchingElements.push(...compareLanesResult.mismatches);
     allMatchingElements.push(...compareLanesResult.matches);
+
+    console.log(allNonMatchingElements);
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
