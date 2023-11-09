@@ -4,7 +4,6 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
         if ((Object.keys(nodeAttributes1).length === 1 && Object.keys(nodeAttributes2).length !== 1) ||
             (Object.keys(nodeAttributes1).length !== 1 && Object.keys(nodeAttributes2).length === 1)) {
             mismatches.push(tree1.node);
-            attrMismatch.push(tree1.node);
             nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
 
             if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
@@ -45,7 +44,10 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
             matches.push(tree1.node);
             checkChildren(tree1.children, tree2.children);
         } else { // otherwise, add the node to mismatches and attrMismatch and find the next matching element
-            attrMismatch.push(tree1.node);
+            
+            if (tree1.node.nodeName !== tree2.node.nodeName) mismatches.push(tree1.node);
+            else attrMismatch.push(tree1.node);
+
             nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
 
             if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
@@ -161,10 +163,6 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     let nodeAttributes1 = Object.fromEntries(Array.from(tree1.node.attributes).map(attr => [attr.name, attr.value]));
     let nodeAttributes2 = Object.fromEntries(Array.from(tree2.node.attributes).map(attr => [attr.name, attr.value]));
 
-    if (tree1.node.nodeName !== tree2.node.nodeName) {
-        mismatches.push(tree1.node);
-        nodeNameMismatch.push(tree1.node);
-    }
     if (Object.keys(nodeAttributes1).length === 1 || Object.keys(nodeAttributes2).length === 1) {
         handleSingleAttributeNode(tree1, tree2);
     } else {
@@ -303,10 +301,14 @@ function compareParticipants(participants1, participants2) {
 
             // compare attributes except id
             let isMatch = true;
-            for (let attr in attributes1) {
-                if (attr !== "id" && attr !== "processRef" &&attributes1[attr] !== attributes2[attr]) {
-                    isMatch = false;
-                    break; 
+            if(attributes1.name === undefined){
+                isMatch = false;
+            }else{
+                for (let attr in attributes1) {
+                    if (attr !== "id" && attr !== "processRef" && attributes1[attr] !== attributes2[attr]) {
+                        isMatch = false;
+                        break; 
+                    }
                 }
             }
 
@@ -444,11 +446,11 @@ function flowNodeRefsMatch(flowNodeRefs1, flowNodeRefs2, bpmnElements1, bpmnElem
 }
 
 export function compareBpmnDiagrams2(diagram1, diagram2){
-    const allNonMatchingElements = [];
-    const allMatchingElements = [];
-    const allNonMatchingAttributes = [];
-    const allNonMatchingNodeNames = [];
-    const allMissingElements = [];
+    let allNonMatchingElements = [];
+    let allMatchingElements = [];
+    let allNonMatchingAttributes = [];
+    let allNonMatchingNodeNames = [];
+    let allMissingElements = [];
 
     const compare = compareTrees(diagram1, diagram2);
     allNonMatchingElements.push(...compare.mismatches);
@@ -469,8 +471,14 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     const compareLanesResult = compareLanes(diagram1.processes.bpmnElements ,diagram1.processes.laneSets, diagram2.processes.bpmnElements, diagram2.processes.laneSets);
     allNonMatchingElements.push(...compareLanesResult.mismatches);
     allMatchingElements.push(...compareLanesResult.matches);
+    
+    allNonMatchingElements = allNonMatchingElements.filter(element => element.hasAttribute("name") && allMatchingElements.includes(element.getAttribute("name")));
+    allNonMatchingAttributes = allNonMatchingAttributes.filter(element => element.hasAttribute("name") && allMatchingElements.includes(element.getAttribute("name")));
+    allNonMatchingNodeNames = allNonMatchingNodeNames.filter(element => element.hasAttribute("name") && allMatchingElements.includes(element.getAttribute("name")));
+    allMissingElements = allMissingElements.filter(element => element.hasAttribute("name") && allMatchingElements.includes(element.getAttribute("name")));
 
-    console.log(allNonMatchingElements);
+    console.log({matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
+        missingElements: allMissingElements });
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
