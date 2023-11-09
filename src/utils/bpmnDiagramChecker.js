@@ -268,6 +268,15 @@ function compareTrees(diagram1, diagram2){
     const trees1 = diagram1.trees;
     const trees2 = diagram2.trees;
 
+    trees1.sort(function(a, b) {
+        if(a.node.hasAttribute("name") && b.node.hasAttribute("name")) return a.node.getAttribute("name").localeCompare(b.node.getAttribute("name"));
+        return a.node.getAttribute("id").localeCompare(b.node.getAttribute("id"));
+    });
+    trees2.sort(function(a, b) {
+        if(a.node.hasAttribute("name") && b.node.hasAttribute("name")) return a.node.getAttribute("name").localeCompare(b.node.getAttribute("name"));
+        return a.node.getAttribute("id").localeCompare(b.node.getAttribute("id"));
+    });
+
     if(trees1.length > trees2.length) allNonMatchingElements.push(...turnTreesIntoArray(trees1.splice(trees2.length)));
     if(trees2.length > trees1.length) allMissingElements.push(...turnTreesIntoArray(trees2.splice(trees1.length)));
 
