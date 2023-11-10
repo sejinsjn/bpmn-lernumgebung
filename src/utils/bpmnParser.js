@@ -1,3 +1,4 @@
+//Starte Syntaxanalyse des XMLs 
 function parseBpmnElements(parentElementName, xmlString) {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -27,19 +28,21 @@ function parseBpmnElements(parentElementName, xmlString) {
     return null;
 }
 
+//Holt alle Elemente die nach bpmn:process kommen und sortiert diese in verschiedene arrays/maps
 function parseProcessElements(xpathResult){
-    let node = xpathResult.iterateNext();
-    var startEvents = [];
-    const bpmnElements = new Map();
-    const sequenceFlows = new Map();
-    const laneSets = [];
-    const subProcesses = [];
-    const bpmnElementsArray = [];
+   let node = xpathResult.iterateNext();
+   var startEvents = [];
+   const bpmnElements = new Map();
+   const sequenceFlows = new Map();
+   const laneSets = [];
+   const subProcesses = [];
+   const bpmnElementsArray = [];
 
-
-    while(node){
-        const children = node.children;
-        for (let i = 0; i < children.length; i++) {
+   // solange nodes existieren
+   while(node){
+      const children = node.children;
+      for (let i = 0; i < children.length; i++) {
+         //Je nach element namen füge passendem Array hinzu
          switch(children[i].nodeName){
             case "bpmn:startEvent":
                startEvents.push(children[i]);
@@ -62,51 +65,57 @@ function parseProcessElements(xpathResult){
                bpmnElements.set(children[i].getAttribute("id"), children[i]);
                break;
          }
-        }
-        node = xpathResult.iterateNext();
-     }
+      }
+      //springe zum nächsten Element
+      node = xpathResult.iterateNext();
+   }
      
-     const processes = {
-         startEvents: startEvents,
-         bpmnElements: bpmnElements,
-         sequenceFlows: sequenceFlows,
-         laneSets: laneSets,
-         subProcesses: subProcesses,
-         bpmnElementsArray: bpmnElementsArray
-     }
+   const processes = {
+      startEvents: startEvents,
+      bpmnElements: bpmnElements,
+      sequenceFlows: sequenceFlows,
+      laneSets: laneSets,
+      subProcesses: subProcesses,
+      bpmnElementsArray: bpmnElementsArray
+   }
 
-     return processes;
- }
+   return processes;
+}
 
+//Holt alle Elemente die nach bpmn:collaboration kommen und sortiert diese in verschiedene arrays/maps
 function parseCollaborationElements(xpathResult) {
-    let node = xpathResult.iterateNext();
-    const messageFlows = [];
-    const participants = [];
- 
-    while(node){
-       const children = node.children;
-       for (let i = 0; i < children.length; i++) {
-          if(children[i].nodeName === "bpmn:messageFlow"){
-             messageFlows.push(children[i]);
-          }
-          if(children[i].nodeName === "bpmn:participant"){
-             participants.push(children[i]);
-          }
-       }
-       node = xpathResult.iterateNext();
-    }
+   let node = xpathResult.iterateNext();
+   const messageFlows = [];
+   const participants = [];
 
-    const collaborations = {
+   //solange Nodes existieren
+   while(node){
+      const children = node.children;
+      //Je nach element namen füge passendem Array hinzu
+      for (let i = 0; i < children.length; i++) {
+         if(children[i].nodeName === "bpmn:messageFlow"){
+            messageFlows.push(children[i]);
+         }
+         if(children[i].nodeName === "bpmn:participant"){
+            participants.push(children[i]);
+         }
+      }
+      //springe zum nächsten Element
+      node = xpathResult.iterateNext();
+   }
+
+   const collaborations = {
       participants: participants,
       messageFlows: messageFlows
-    }
+   }
 
-    return collaborations;
- }
+   return collaborations;
+}
 
+//Erstellt Bäume anhand eines Startknotens und allen Elementen aus bpmn Elements
 function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) {
+   //Loop erkannt
    if (visited.has(rootNode.getAttribute("id"))) {
-      // Cycle detected
       return null;
    }
 
@@ -115,15 +124,20 @@ function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) 
       name: rootNode.nodeName,
       children: []
    };
-
+   //Node besucht
    visited.add(rootNode.getAttribute("id"));
+
    if(rootNode !== undefined){
+      //Speicher alle outgoing Elemente in rootNode in ein Array
       const outgoingFlows = Array.from(rootNode.getElementsByTagName("bpmn:outgoing"));
+      //Durchlaufe Array
       outgoingFlows.forEach((flow) => {
-               const flowId = flow.textContent;
-               const targetId = sequenceFlows.get(flowId).getAttribute("targetRef");
+               const flowId = flow.textContent; //hole ID von outgoing
+               const targetId = sequenceFlows.get(flowId).getAttribute("targetRef"); //hole das outgoing Element
+               //Erstelle den nächsten Baum anhand des Elements von targetId
                const subtree = createTree(bpmnElements.get(targetId), bpmnElements, sequenceFlows, visited);
                if (subtree) {
+                  //Speicher Baum als Kind
                   tree.children.push(subtree);
                }
       });
@@ -142,6 +156,7 @@ function createTrees(processes){
     return trees;
 }
 
+//Ruft die nötigen Funktionen auf und gibt das Gesamtergebnis zurück
 export function parseBpmnDiagram(diagram){
    // processes object contain 4 arrays with StartEvents, BpmnElements, Flows, LaneSets
    const processes = parseBpmnElements("//bpmn:process", diagram);

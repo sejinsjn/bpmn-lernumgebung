@@ -15,19 +15,19 @@ import SchwachstellenErklaerung from '../../components/schwachstellenErklaerung'
 var selectedElements = [];
 
 const ResizableDivs = (randomNumber) => {
-    const containerRef = useRef(null);
-    const viewerRef = useRef(null);
+    const containerRef = useRef(null); // Reference für den Container wo der Viewer ist
+    const viewerRef = useRef(null);  // Reference auf den Viewer
 
-    const [diagram, setDiagram] = useState("");
-    const [task, setTask] = useState("");
-    const [vulnerabilities, setVulnerabilities] = useState("");
-    const [explanations, setExplanations] = useState("");
-    const [feedback, setFeedback] = useState("");
-    const [isSolutionCorrect, setIsSolutionCorrect] = useState(false);
-    const [data, setData] = useState(null);
-    const [parsedDiagram, setParsedDiagram] = useState(null);
-    const [jsonLoaded, setJsonLoaded] = useState(false);
-    const [taskNumber, setTaskNumber] = useState(0);
+    const [diagram, setDiagram] = useState(""); // Diagram welches im Viewer ist
+    const [task, setTask] = useState(""); // Aufgabenstellung als Text
+    const [vulnerabilities, setVulnerabilities] = useState(""); // Array mit IDs von Elementen
+    const [explanations, setExplanations] = useState(""); // String Array mit den Erklärungen zu den Schwachstellen
+    const [feedback, setFeedback] = useState(""); // Feedback text
+    const [isSolutionCorrect, setIsSolutionCorrect] = useState(false); // Tracked ob die erstellte Lösung richtig ist
+    const [data, setData] = useState(null); // 
+    const [parsedDiagram, setParsedDiagram] = useState(null); //Beinhaltet die Objekte processes, collaborations, trees von solution
+    const [jsonLoaded, setJsonLoaded] = useState(false); // Ob JSON geladen wurde
+    const [taskNumber, setTaskNumber] = useState(0); // Welche Aufgabe geladen wurde
 
     const countMatchingElements = (array1, array2) => {
         let count = 0;
