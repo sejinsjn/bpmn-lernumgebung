@@ -127,8 +127,8 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
             }else{
                 for (let i = 0; i < children1.length; i++) {
                     let child1 = children1[i];
-                    let child2 = children2.find(c => c.node.getAttribute("name").toLowerCase() === child1.node.getAttribute("name").toLowerCase() || 
-                        (!child1.node.hasAttribute("name") && !child2.node.hasAttribute("name") && child1.node.nodeName === child2.node.nodeName));
+                    let child2 = children2.find(c => (c.node.hasAttribute("name") && child1.node.hasAttribute("name") && c.node.getAttribute("name").toLowerCase() === child1.node.getAttribute("name").toLowerCase()) || 
+                        (!child1.node.hasAttribute("name") && !c.node.hasAttribute("name") && child1.node.nodeName === c.node.nodeName));
                     if (child2) {
                         let result = compareTree(child1, child2, bpmnElements1, bpmnElements2);
                         matches.push(...result.matches);
@@ -144,26 +144,33 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
 
                 children2NoMatches = children2.filter(c => !children2Matches.some(match => match.node.getAttribute("id") === c.node.getAttribute("id")));
                 for (let i = 0; i < children2NoMatches.length; i++) {
-                    for (let j = 0; j < children1NoMatches.length; j++) {
-                        if(children1NoMatches[j].children){
-                            nextMatchingElement = findNextMatchingElement(children2NoMatches[i].node, children1NoMatches[j].children);
-                            //suche nächstes Element was dem jetzigen zu trifft
-                            if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
-                                missingElements.push(children2NoMatches[i].node); //zu den fehlenden hinzufügen
-                                nextMatchingElement = findNextMatchingElement(children1NoMatches[j].node, children2NoMatches[i].children); //Prüfe ob tree1 in den Kindern von tree2 ist
-
+                    if(children1NoMatches.length > 0){
+                        for (let j = 0; j < children1NoMatches.length; j++) {
+                            if(children1NoMatches[j].children){
+                                nextMatchingElement = findNextMatchingElement(children2NoMatches[i].node, children1NoMatches[j].children); //Prüfe ob tree2 in den Kindern von tree1 ist
+                                //suche nächstes Element was dem jetzigen zu trifft
                                 if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
-                                    mismatches.push(children1NoMatches[j].node); //zu den falschen Elementen hinzufügen
-                                    checkChildren(children1NoMatches[j].children, children2NoMatches[i].children);
-                                }else{
-                                    matches.push(children1NoMatches[j].node); //Zu den richtigen Elementen hinzufügen
-                                    checkChildren(children1NoMatches[j].children, nextMatchingElement.matchingElement.children);
+                                    missingElements.push(children2NoMatches[i].node); //zu den fehlenden hinzufügen
+                                    nextMatchingElement = findNextMatchingElement(children1NoMatches[j].node, children2NoMatches[i].children); //Prüfe ob tree1 in den Kindern von tree2 ist
+    
+                                    if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
+                                        mismatches.push(children1NoMatches[j].node); //zu den falschen Elementen hinzufügen
+                                        checkChildren(children1NoMatches[j].children, children2NoMatches[i].children);
+                                    }else{
+                                        matches.push(children1NoMatches[j].node); //Zu den richtigen Elementen hinzufügen
+                                        checkChildren(children1NoMatches[j].children, nextMatchingElement.matchingElement.children);
+                                    }
+                                } else {
+                                    matches.push(nextMatchingElement.matchingElement.node);
+                                    mismatches.push(...nextMatchingElement.nonMatchingElements);
+                                    checkChildren(nextMatchingElement.matchingElement.children, children2NoMatches[i].children);
                                 }
-                            } else {
-                                matches.push(nextMatchingElement.matchingElement.node);
-                                mismatches.push(...nextMatchingElement.nonMatchingElements);
-                                checkChildren(nextMatchingElement.matchingElement.children, children2NoMatches[i].children);
                             }
+                        }
+                    }else{
+                        //Falls children1NoMatches leer zu missingElements hinzufügen
+                        if(children2NoMatches.length > 0){
+                            missingElements.push(...addAllChildren(children2NoMatches));
                         }
                     }
                 }
