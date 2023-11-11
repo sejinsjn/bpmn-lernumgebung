@@ -39,7 +39,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
         
         //überprüfe alle Attribute
         for (let attr in nodeAttributes1) {
-            if (attr !== "id" && nodeAttributes1[attr].toLowerCase() !== nodeAttributes2[attr].toLowerCase()) {
+            if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
                 allMatch = false;
                 break;
             }
@@ -127,7 +127,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
             }else{
                 for (let i = 0; i < children1.length; i++) {
                     let child1 = children1[i];
-                    let child2 = children2.find(c => (c.node.hasAttribute("name") && child1.node.hasAttribute("name") && c.node.getAttribute("name").toLowerCase() === child1.node.getAttribute("name").toLowerCase()) || 
+                    let child2 = children2.find(c => (c.node.hasAttribute("name") && child1.node.hasAttribute("name") && c.node.getAttribute("name") === child1.node.getAttribute("name")) || 
                         (!child1.node.hasAttribute("name") && !c.node.hasAttribute("name") && child1.node.nodeName === c.node.nodeName));
                     if (child2) {
                         let result = compareTree(child1, child2, bpmnElements1, bpmnElements2);
@@ -281,7 +281,7 @@ function findNextMatchingElement(node, children) {
 
         let isMatch = true;
         for (let attr in nodeAttributes1) {
-            if (attr !== "id" && nodeAttributes1[attr].toLowerCase() !== nodeAttributes2[attr].toLowerCase()) { //Überprüfung der Attribute
+            if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) { //Überprüfung der Attribute
                 isMatch = false;
                 break;
             }
@@ -360,7 +360,7 @@ function compareTrees(diagram1, diagram2){ //diagram2 ist die lösung
 
     for (let i = 0; i < trees1.length; i++) {
         let tree1 = trees1[i];
-        let tree2 = trees2.find(t => t.node.getAttribute("name").toLowerCase() === tree1.node.getAttribute("name").toLowerCase());
+        let tree2 = trees2.find(t => t.node.getAttribute("name") === tree1.node.getAttribute("name"));
         if (tree2) {
             let compare = compareTree(tree1, tree2, diagram1.processes.bpmnElements, diagram2.processes.bpmnElements);
             allNonMatchingElements.push(...compare.mismatches);
@@ -400,7 +400,7 @@ function compareParticipants(participants1, participants2) {
                 isMatch = false;
             }else{
                 for (let attr in attributes1) {
-                    if (attr !== "id" && attr !== "processRef" && attributes1[attr].toLowerCase() !== attributes2[attr].toLowerCase()) {
+                    if (attr !== "id" && attr !== "processRef" && attributes1[attr] !== attributes2[attr]) {
                         isMatch = false;
                         break; 
                     }
@@ -460,8 +460,8 @@ function isMatch(messageFlow1, messageFlow2, bpmnElements1, bpmnElements2) {
 
     if (bpmnElements1.get(sourceRef1) !== undefined && bpmnElements2.get(sourceRef2) !== undefined) {
         //Vergleich der zwei Elemente vom Ziel und Ursprung
-        if (bpmnElements1.get(sourceRef1).getAttribute("name").toLowerCase() !== bpmnElements2.get(sourceRef2).getAttribute("name").toLowerCase()
-            || bpmnElements1.get(targetRef1).getAttribute("name").toLowerCase() !== bpmnElements2.get(targetRef2).getAttribute("name").toLowerCase()
+        if (bpmnElements1.get(sourceRef1).getAttribute("name") !== bpmnElements2.get(sourceRef2).getAttribute("name")
+            || bpmnElements1.get(targetRef1).getAttribute("name") !== bpmnElements2.get(targetRef2).getAttribute("name")
             || messageFlow1.nodeName !== messageFlow2.nodeName) {
             return false;
         }
@@ -522,7 +522,7 @@ function attributesMatch(laneAttributes1, laneAttributes2) {
         const attrValue1 = laneAttributes1[i].value;
         const attrValue2 = laneAttributes2[i].value;
 
-        if (laneAttributes1[i].name !== "id" && attrValue1.toLowerCase() !== attrValue2.toLowerCase()) return false;
+        if (laneAttributes1[i].name !== "id" && attrValue1 !== attrValue2) return false;
     }
 
     return true;
