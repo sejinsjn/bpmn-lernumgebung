@@ -583,11 +583,13 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     allNonMatchingElements.push(...compareLanesResult.mismatches);
     allMatchingElements.push(...compareLanesResult.matches);
     
-    //Entferne alle Elemente von allen anderen Arrays, die in allMatchingElements sind
+    //Entferne alle doppelten Elemente
     allNonMatchingElements = allNonMatchingElements.filter((item, index, self) => self.indexOf(item) === index);
     allNonMatchingAttributes = allNonMatchingAttributes.filter((item, index, self) => self.indexOf(item) === index);
     allNonMatchingNodeNames = allNonMatchingNodeNames.filter((item, index, self) => self.indexOf(item) === index);
     allMissingElements = allMissingElements.filter((item, index, self) => self.indexOf(item) === index);
+    allMissingElements = allMissingElements.filter(item => allMatchingElements.filter(match => match.hasAttribute("name") && item.hasAttribute("name") 
+                                    && match.getAttribute("name") === item.getAttribute("name")));
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
