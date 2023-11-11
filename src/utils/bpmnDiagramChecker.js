@@ -346,6 +346,8 @@ function compareTrees(diagram1, diagram2){ //diagram2 ist die lösung
     const allNonMatchingNodeNames = [];
     const allMissingElements = [];
     const allMatchingElements = [];
+    let treesFound = [];
+    let treesNotFound = [];
     const trees1 = diagram1.trees;
     const trees2 = diagram2.trees;
 
@@ -359,10 +361,12 @@ function compareTrees(diagram1, diagram2){ //diagram2 ist die lösung
             allNonMatchingAttributes.push(...compare.attrMismatch);
             allNonMatchingNodeNames.push(...compare.nodeNameMismatch);
             allMissingElements.push(...compare.missingElements);
-        } else {
-            allMissingElements.push(...turnTreeIntoArray(tree1));
+            treesFound.push(tree2);
         }
     }
+
+    treesNotFound = trees2.filter(t => !treesFound.includes(t));
+    allMissingElements.push(...turnTreesIntoArray(treesNotFound));
     
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements};
