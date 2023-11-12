@@ -44,6 +44,10 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                 break;
             }
         }
+
+        if (tree1.node.nodeName !== tree2.node.nodeName) {
+            allMatch = false;
+        }
         
         if (allMatch) {
             matches.push(tree1.node);
@@ -127,7 +131,8 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
             }else{
                 for (let i = 0; i < children1.length; i++) {
                     let child1 = children1[i];
-                    let child2 = children2.find(c => (c.node.hasAttribute("name") && child1.node.hasAttribute("name") && c.node.getAttribute("name") === child1.node.getAttribute("name")) || 
+                    let child2 = children2.find(c => (c.node.hasAttribute("name") && child1.node.hasAttribute("name") && 
+                    c.node.getAttribute("name") === child1.node.getAttribute("name") && child1.node.nodeName === c.node.nodeName) || 
                         (!child1.node.hasAttribute("name") && !c.node.hasAttribute("name") && child1.node.nodeName === c.node.nodeName));
                     if (child2) {
                         let result = compareTree(child1, child2, bpmnElements1, bpmnElements2);
@@ -147,6 +152,8 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                     if(children1NoMatches.length > 0){
                         for (let j = 0; j < children1NoMatches.length; j++) {
                             if(children1NoMatches[j].children){
+                                console.log(children1NoMatches[j].children);
+                                console.log(children2NoMatches[i].children);
                                 nextMatchingElement = findNextMatchingElement(children2NoMatches[i].node, children1NoMatches[j].children); //Prüfe ob tree2 in den Kindern von tree1 ist
                                 //suche nächstes Element was dem jetzigen zu trifft
                                 if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
@@ -588,8 +595,8 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     allNonMatchingAttributes = allNonMatchingAttributes.filter((item, index, self) => self.indexOf(item) === index);
     allNonMatchingNodeNames = allNonMatchingNodeNames.filter((item, index, self) => self.indexOf(item) === index);
     allMissingElements = allMissingElements.filter((item, index, self) => self.indexOf(item) === index);
-    allMissingElements = allMissingElements.filter(item => allMatchingElements.filter(match => match.hasAttribute("name") && item.hasAttribute("name") 
-                                    && match.getAttribute("name") === item.getAttribute("name")));
+
+
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
