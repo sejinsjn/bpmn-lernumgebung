@@ -398,51 +398,36 @@ function compareParticipants(participants1, participants2) {
     return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements};
 }
 
-
 //Vergleich der Elemente, die mit einem Messageflow verbunden sind
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2) {
-    let matchingMessageFlows = [];
-    let nonMatchingMessageFlows = [];
 
-    //Vergleiche alle messageFlows von 1 mit 2
-    for (let messageFlow1 of messageFlows1) {
-        let isMatchFound = false;
+    //Prüft ob zwei Messageflows übereintimmen
+    function isMatch(messageFlow1, messageFlow2) {
+        const sourceRef1 = messageFlow1.getAttribute("sourceRef");
+        const targetRef1 = messageFlow1.getAttribute("targetRef");
+        const sourceRef2 = messageFlow2.getAttribute("sourceRef");
+        const targetRef2 = messageFlow2.getAttribute("targetRef");
 
-        for (let messageFlow2 of messageFlows2) {
-            //prüft ob MessageFlow übereinstimmt
-            if (isMatch(messageFlow1, messageFlow2, bpmnElements1, bpmnElements2)) {
-                isMatchFound = true;
-                break;
+        if (bpmnElements1.get(sourceRef1) !== undefined && bpmnElements2.get(sourceRef2) !== undefined) {
+            //Vergleich der zwei Elemente vom Ziel und Ursprung
+            if (bpmnElements1.get(sourceRef1).getAttribute("name") !== bpmnElements2.get(sourceRef2).getAttribute("name")
+                || bpmnElements1.get(targetRef1).getAttribute("name") !== bpmnElements2.get(targetRef2).getAttribute("name")
+                || messageFlow1.nodeName !== messageFlow2.nodeName) {
+                return false;
             }
         }
-
-        if (isMatchFound) {
-            matchingMessageFlows.push(messageFlow1);
-        } else {
-            nonMatchingMessageFlows.push(messageFlow1);
-        }
+        console.log(bpmnElements1);
+        return true;
     }
 
-    return { matches: matchingMessageFlows, mismatches: nonMatchingMessageFlows };
-}
+    //Filtert alle Elemente in messageFlows1 die keinen match mit Elementen in messageFlows2 haben
+    const allNonMatchingElements = messageFlows1.filter(messageFlow1 => messageFlows2.some(messageFlow2 => !isMatch(messageFlow1, messageFlow2))); 
+    //Filtert alle Elemente in messageFlows1 die einen match mit Elementen in messageFlows2 haben
+    const allMatchingElements = messageFlows1.filter(messageFlow1 => messageFlows2.some(messageFlow2 => isMatch(messageFlow1, messageFlow2))); 
+    //Filtert alle Elemente in messageFlows2 die keinen match mit Elementen in messageFlows1 haben
+    const missingElements = messageFlows2.filter(messageFlow2 => messageFlows1.some(messageFlow1 => isMatch(messageFlow1, messageFlow2))); 
 
-//Prüft ob zwei Messageflows übereintimmen
-function isMatch(messageFlow1, messageFlow2, bpmnElements1, bpmnElements2) {
-    const sourceRef1 = messageFlow1.getAttribute("sourceRef");
-    const targetRef1 = messageFlow1.getAttribute("targetRef");
-    const sourceRef2 = messageFlow2.getAttribute("sourceRef");
-    const targetRef2 = messageFlow2.getAttribute("targetRef");
-
-    if (bpmnElements1.get(sourceRef1) !== undefined && bpmnElements2.get(sourceRef2) !== undefined) {
-        //Vergleich der zwei Elemente vom Ziel und Ursprung
-        if (bpmnElements1.get(sourceRef1).getAttribute("name") !== bpmnElements2.get(sourceRef2).getAttribute("name")
-            || bpmnElements1.get(targetRef1).getAttribute("name") !== bpmnElements2.get(targetRef2).getAttribute("name")
-            || messageFlow1.nodeName !== messageFlow2.nodeName) {
-            return false;
-        }
-    }
-
-    return true;
+    return { matches: allMatchingElements, mismatches: allNonMatchingElements, missingElements: missingElements };
 }
 
 //Vergleich der Lanes innerhalb eines Akteures
