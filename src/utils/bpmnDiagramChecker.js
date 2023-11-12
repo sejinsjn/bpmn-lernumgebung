@@ -388,48 +388,16 @@ function compareTrees(diagram1, diagram2){ //diagram2 ist die lösung
 
 //Vergleich der Akteure
 function compareParticipants(participants1, participants2) {
-    const allNonMatchingElements = [];
-    const allMatchingElements = [];
-    const missingElements = [];
-
-    //Alle Akteure von 1 werden mit 2 verglichen
-    for(var j = 0; j < participants1.length; j++){
-        let matchFound = false;
-        const participant1 = participants1[j];
-        const attributes1 = Object.fromEntries(Array.from(participant1.attributes).map(attr => [attr.name, attr.value]));
-
-        for(var k = 0; k < participants2.length; k++){
-            const participant2 = participants2[k];
-            const attributes2 = Object.fromEntries(Array.from(participant2.attributes).map(attr => [attr.name, attr.value]));
-
-            let isMatch = true;
-            if(attributes1.name === undefined){ //falls kein Attribut name -> mismatch
-                isMatch = false;
-            }else{
-                for (let attr in attributes1) {
-                    if (attr !== "id" && attr !== "processRef" && attributes1[attr] !== attributes2[attr]) {
-                        isMatch = false;
-                        break; 
-                    }
-                }
-            }
-
-            //falls match, füg allMatchingElements hinzu
-            if(isMatch){
-                allMatchingElements.push(participant1);
-                matchFound = true;
-                break;
-            }
-        }
-        //falls kein match, füg allNonMatchingElements hinzu
-        if(!matchFound){
-            allNonMatchingElements.push(participant1);
-        }
-    }
-
+    //Filtert alle Elemente in participants1 die keinen match mit Elementen in participants2 haben
+    const allNonMatchingElements = participants1.filter(participant1 => !participants2.some(participant2 => participant2.getAttribute("name") === participant1.getAttribute("name"))); 
+    //Filtert alle Elemente in participants1 die einen match mit Elementen in participants2 haben
+    const allMatchingElements = participants1.filter(participant1 => participants2.some(participant2 => participant1.getAttribute("name") === participant2.getAttribute("name")));
+    //Filtert alle Elemente in participants2 die keinen match mit Elementen in participants1 haben
+    const missingElements = participants2.filter(participant2 => !participants1.some(participant1 => participant1.getAttribute("name") === participant2.getAttribute("name")));
 
     return {allNonMatchingElements: allNonMatchingElements, allMatchingElements: allMatchingElements, missingElements: missingElements};
 }
+
 
 //Vergleich der Elemente, die mit einem Messageflow verbunden sind
 function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messageFlows2) {
