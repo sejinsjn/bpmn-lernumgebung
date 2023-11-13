@@ -1,23 +1,9 @@
 {
     "1": {
-        "task": "**Pizza Bestellung**", 
-        "diagram": "/xml/PizzaOrderExample.xml",
-        "vulnerabilities": ["Activity_0livwqt", "Activity_1s3dp82"],
-        "explanations":["Erklaerung1", "Erklaerung2"],
-        "tips":""
-    },
-    "2": {
-        "task": "**Nobelpreis** Modellieren Sie das Auswahlverfahren für den Nobelpreis in Form von BPMN 2.0. Das Auswahlverfahren für den Nobelpreis umfasst die folgende Schritte: \n\nErnennung: Das Nobelpreiskomitee sendet das Nominierungsformular an den Ernener. Die Liste der Ernenner wird von der Datenbank abgerufen. Nachdem der Ernenner die potenziellen Kandidaten gefunden und die ausgefüllten Formulare an das Komitee zurückgeschickt hat, werden diese Formulare gesammelt und in der Datenbank gespeichert. \n\nBewertung: Nachdem das Komitee alle Nominierungsformulare überprüft und vorläufige Kandidaten ausgewählt hat, falls die fachkundige Unterstützung erforderlich ist, wird die Liste der vorläufigen Kandidaten an den Experten gesendet. Danach greifen die Experten auf die Arbeit der Kandidaten zu und senden die Bewertungsberichte des Kandidaten an das Komitee zurück. Falls die fachkundige Unterstützung nicht erforderlich ist, werden die endgültigen Kandidaten und ihre Arbeiten ausgewählt. \n\nEndgültige Auswahl: Die Nobelpreiskomitees stimmen über die endgültigen Preisträger für jede Kategorie ab.\n\nAm Ende wird die Zeremonie abgehalten.\n\nDie vorgegebene Beschriftungen:\nListe der Ernenner / Nominierungsformular senden/ ausgefüllte Formulare sammeln/ Nobelpreiskomitee/ Ernenner/ Expert/ ausgefüllte Nominierungsformulare / überprüfen und vorläufige Kandidaten auswählen/ fachkundige Unterstützung erforderlich ?/ Liste der vorläufigen Kandidaten/ Liste der vorläufigen Kandidaten senden / den Bewertungsbericht der Kandidaten senden/ auf die Arbeit der Kandidaten zugreifen/ Bewertungen der Kandidaten/ Bewertungsberichte der Kandidaten sammeln/ die endgültigen Kandidaten und ihre Arbeiten auswählen/ Preisträgerinnen auswählen und ankündigen/ Zeremonie abhalten/potenzielle Kandidaten ermitteln/ ausgefüllte Formulare versenden",
-        "diagram": "/xml/Nobelpreis.xml",
-        "vulnerabilities": ["Activity_0u3h360","Activity_097mq4a" ],
-        "explanations":["Erklaerung1", "Erklaerung2"],
-        "tips":""
-    },
-    "3": {
         "task": "**Geld Abheben** \n\n Betrachten Sie das folgende BPMN-Diagramm für einen Geldabhebevorgang an einem Bankautomaten. Finden Sie die Schwachstelle in diesem Prozess und erklären Sie, warum sie ein Sicherheitsrisiko darstellt. Schreiben Sie auch, wie Sie diese Schwachstelle beheben würden.",
         "diagram": "/xml/GeldAbheben.xml",
         "vulnerabilities": ["Activity_02fjru0"],
-        "explanations":["Der Prozess hat keine Endereignisse für die Fälle, in denen der Kunde die PIN dreimal falsch eingibt oder das Geld nicht entnimmt. Dies kann zu Verwirrung oder unerwünschten Ergebnissen führen."],
+        "explanations":["Der Prozess hat keine Endereignisse für die Fälle, in denen der Kunde die PIN dreimal falsch eingibt oder das Geld nicht entnimmt. Dies kann zu einem Sicherheitsrisiko entstehen, da jeder einfach solang PIN Kombinationen ausprobieren bis er den richtigen PIN herausbekommt. Um das zu lösen wäre es möglich zu prüfen, wie oft der PIN hintereinander falsch eingegeben wurde. Nach dem dritten mal wird dann das Konto gesperrt, damit niemand in das Konto reinkommen kann."],
         "tips":""
     }
 }

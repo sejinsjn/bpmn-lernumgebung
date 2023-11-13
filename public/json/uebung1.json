@@ -1,7 +1,7 @@
 {
     "1": {
-        "task": "**Pizza Bestellung**", 
-        "diagram": "/xml/TEST.xml",
+        "task": "**Kontostand einsehen**", 
+        "diagram": "/xml/KontostandEinsehen.xml",
         "tips": ""
     },
     "2": {
@@ -17,6 +17,11 @@
     "4": {
         "task": "**Prüfung**\n\nDieses Diagram soll eine Prüfung darstellen angefangen von der Prüfungsanmeldung bis zur Noteneintragung. Das Diagram beinhaltet drei Akteure, die jeweils eine wichtige Rolle in diesem Ablauf spielen.\n\nAngefangen wird hier mit dem Studenten der sich für eine Prüfung anmelden will. Nach der erfolgreichen Anmeldung schreibt der Student die Klausur. Danach wartet der Student ausgiebig auf die Klausurnoten. Wenn die Klausurnoten veröffentlicht wurden, meldet sich der Student im Hisinone an um seine Note abzurufen.\n\nNeben dem Studenten passiert hinter den Kulissen aber noch etwas. Das Studienbüro erhält die Prüfungsanmeldung vom Studenten. Dieses überprüft dann, ob dieser die Voraussetzungen erfüllt oder nicht. Abhängig davon wird die Prüfung an- oder abgemeldet. Falls die Anmeldung erfolgreich ist, wird eine weitere Anmeldung an der gleichen Klausur bis auf weiteres deaktiviert. Wenn es soweit ist werden alle Klausurtermine veröffentlicht und die Klausurenphase gestartet. Hier wartet das Studienbüro nur noch auf die ganzen Noten um diese später zu veröffentlichen und die Klausurenphase zu beenden.\n\nUm die Klausuren zu korrigieren und die Noten eintragen zu können brauchen wir noch den Dozenten. Dieser erhält die geschriebenen Klausuren eines Kurses und korrigiert diese. Anschließend werden die Noten eingetragen, die das Studienbüro dann bekommt. Nach der Eintragung der Noten werden die Studenten darüber benachrichtigt .\n\nAußerdem gibt es drei Datenobjekte und zwei Datenbankobjekte. Überlegen Sie an welchen Elemente diese angebracht wären. Falls Sie dabei Hilfe brauchen, schauen Sie sich die Elementliste unter dieser Aufgabe an. Die zwei Datenbankobjekte sind nur im Akteur Student enthalten.",
         "diagram": "/xml/Prüfungsablauf.xml",
+        "tips": ""
+    },
+    "5": {
+        "task": "**Pizzabestellung**",
+        "diagram": "/xml/PizzaOrderExample.xml",
         "tips": ""
     } 
 }
