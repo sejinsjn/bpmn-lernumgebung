@@ -1,6 +1,6 @@
 {
     "1": {
-        "task": "**Kontostand einsehen**", 
+        "task": "**Kontostand einsehen**\n\nIn diesem Diagram wird das Einsehen des Kontostands beschrieben und besitzt genau einen Akteur nämlich den Bankkunden. \n\nUm den Kontostand Ihres Bankkontos einzusehen, müssen Sie sich zunächst auf der Webseite Ihrer Bank einloggen. Nachdem Sie Ihre Logindaten eingegeben haben, wird geprüft, ob diese korrekt sind. Falls nicht, können Sie Ihre Logindaten erneut eingeben, bis diese drei mal falsch eingegeben wurden. In diesem Fall wird das Konto gesperrt und der Kontostand kann nicht mehr eingesehen werden. Wenn Ihre Logindaten korrekt sind, wird eine Benachrichtigung an die PushTan-App gesendet, um einen Auftrag zu bestätigen. Sobald Sie die App geöffnet und sich einmal eingeloggt haben, können Sie den Auftrag freigeben. Nach der Freigabe wird wieder auf die Webseite gewechselt, um den Kontostand einsehen zu können.", 
         "diagram": "/xml/KontostandEinsehen.xml",
         "tips": ""
     },
@@ -10,7 +10,7 @@
         "tips": ""
     } ,
     "3": {
-        "task": "**Arzttermin** Dieses Diagram soll den Ablauf einer Terminvereinbarung mit einem Arzt darstellen. Dabei spielen die zwei Akteure Patient und Rezeptionist eine Rolle.\n\nBei einem gesundheitlichem Problem muss der Patient einen Arzt besuchen und dafür muss er einen Termin vereinbaren. Somit sucht dieser sich einen Arzt raus und ruft diesen an. Anschließend fragt er nach einem freien Termin und wartet auf eine Antwort. Falls der Termin passt bestätigt der Patient diesen und verabschiedet sicht. Im Fall dass der Termin doch nicht passt, wird dankend abgelehnt und der Patient hat keinen Termin erhalten.\n\nDer Rezeptionist erhält einen Anruf und nimmt diesen entgegen. Auf die Terminnachfrage wird geprüft, wann es Termine gibt und dementsprechend der nächste Termin wird angeboten. Nach dem Angebot wird auf die Antwort des Patienten gewartet und dementsprechend gehandelt. Wird der Termin bestätigt, kommt noch eine Bestätigung per SMS und der Termin wird zum Schluss eingetragen.\nBei einer Absage verabschiedet sich der Rezeptionist und beendet den Anruf.",
+        "task": "**Arzttermin** \n\nDieses Diagram soll den Ablauf einer Terminvereinbarung mit einem Arzt darstellen. Dabei spielen die zwei Akteure Patient und Rezeptionist eine Rolle.\n\nBei einem gesundheitlichem Problem muss der Patient einen Arzt besuchen und dafür muss er einen Termin vereinbaren. Somit sucht dieser sich einen Arzt raus und ruft diesen an. Anschließend fragt er nach einem freien Termin und wartet auf eine Antwort. Falls der Termin passt bestätigt der Patient diesen und verabschiedet sicht. Im Fall dass der Termin doch nicht passt, wird dankend abgelehnt und der Patient hat keinen Termin erhalten.\n\nDer Rezeptionist erhält einen Anruf und nimmt diesen entgegen. Auf die Terminnachfrage wird geprüft, wann es Termine gibt und dementsprechend der nächste Termin wird angeboten. Nach dem Angebot wird auf die Antwort des Patienten gewartet und dementsprechend gehandelt. Wird der Termin bestätigt, kommt noch eine Bestätigung per SMS und der Termin wird zum Schluss eingetragen.\nBei einer Absage verabschiedet sich der Rezeptionist und beendet den Anruf.",
         "diagram": "/xml/Arzttermin.xml",
         "tips": ""
     },
@@ -20,7 +20,7 @@
         "tips": ""
     },
     "5": {
-        "task": "**Pizzabestellung**",
+        "task": "**Pizzabestellung**\n\nDieses Diagram beschreibt eine Pizzabestellung und die Beschriftungen sind auf Englisch. Es besitzt genau zwei Akteure und zwar dem Pizza Customer und dem Pizza Vendor. Jedoch besitzt der Pizza Vendor drei Lanes, die seine Aufgaben in drei Kategorien aufteilt.\n\nAngefangen wird hier mit dem Pizza Customer, der hungrig geworden ist. Da dieser gerne was essen möchte, sucht dieser sich eine Pizza aus und bestellt diese. Nach der Bestellung wartet dieser auf die Pizza, jedoch maximal 60 Minuten. Falls 60 Minuten um sind fragt dieser den Pizza Vendor nach der Pizza, wo die bleibt. Wird die Pizza geliefert, zahlt der Pizza Customer und isst die Pizza um seinen Hunger zu sättigen.\n\nDer Pizza Vendor erhält die Bestellung und verarbeitet diese und fängt mit dem Zubereiten der Pizza an. Jedes mal wenn der Pizza Customer nach der Pizza fragt, wird dieser beruhigt. Nach der Zubereitung wird Pizza geliefert und erhält die Bezahlung.\n\nHier gibt es drei Nachrichtenflüsse. Überlegen Sie sich wo die am besten hinpassen. Achten Sie dabei auf die MessageCatch Events!",
         "diagram": "/xml/PizzaOrderExample.xml",
         "tips": ""
     } 

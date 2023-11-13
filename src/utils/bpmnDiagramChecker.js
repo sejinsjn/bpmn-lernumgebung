@@ -29,33 +29,38 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
     
     // Überprüfung von nodes mit mehreren Attributen 
     function handleMultipleAttributeNode(tree1, tree2) {
-        let allMatch = true;
+        let attrMatch = true;
+        let nodeMatch = true;
         // überprüfe ob start event und welches
         if(tree1.node.nodeName.includes("Event")){
             if(tree1.node.nodeName === tree2.node.nodeName){
-                allMatch = checkStartEventType(tree1, tree2);
+                nodeMatch = checkStartEventType(tree1, tree2);
             }
         }
         
         //überprüfe alle Attribute
         for (let attr in nodeAttributes1) {
             if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) {
-                allMatch = false;
+                attrMatch = false;
                 break;
             }
         }
 
         if (tree1.node.nodeName !== tree2.node.nodeName) {
-            allMatch = false;
+            nodeMatch = false;
         }
-        
-        if (allMatch) {
+
+        if(attrMatch && nodeMatch){
             matches.push(tree1.node);
             checkChildren(tree1.children, tree2.children);
-        } else { 
-            //Überprüfung, ob nur attribute nicht passen, sondern auch was fürn Node es iist
-            if (tree1.node.nodeName !== tree2.node.nodeName) mismatches.push(tree1.node);
-            else attrMismatch.push(tree1.node);
+        }else{
+            if(!attrMatch && !nodeMatch){
+                mismatches.push(tree1.node);
+            }else{
+                if(!attrMatch) attrMismatch.push(tree1.node);
+    
+                if(!nodeMatch) nodeNameMismatch.push(tree1.node);
+            }
 
             if(tree1.children){
                 nextMatchingElement = findNextMatchingElement(tree2.node, tree1.children);
@@ -75,6 +80,8 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                 } else {
                     matches.push(nextMatchingElement.matchingElement.node);
                     mismatches.push(...nextMatchingElement.nonMatchingElements);
+                    attrMismatch.push(...nextMatchingElement.attrMismatch);
+                    nodeNameMismatch.push(...nextMatchingElement.nodeNameMismatch);
                     checkChildren(nextMatchingElement.matchingElement.children, tree2.children);
                 }
             }else{
@@ -152,8 +159,6 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                     if(children1NoMatches.length > 0){
                         for (let j = 0; j < children1NoMatches.length; j++) {
                             if(children1NoMatches[j].children){
-                                console.log(children1NoMatches[j].children);
-                                console.log(children2NoMatches[i].children);
                                 nextMatchingElement = findNextMatchingElement(children2NoMatches[i].node, children1NoMatches[j].children); //Prüfe ob tree2 in den Kindern von tree1 ist
                                 //suche nächstes Element was dem jetzigen zu trifft
                                 if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
@@ -161,15 +166,20 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                                     nextMatchingElement = findNextMatchingElement(children1NoMatches[j].node, children2NoMatches[i].children); //Prüfe ob tree1 in den Kindern von tree2 ist
     
                                     if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
-                                        mismatches.push(children1NoMatches[j].node); //zu den falschen Elementen hinzufügen
+                                        compareTree(children1NoMatches[j], children2NoMatches[i]);
                                         checkChildren(children1NoMatches[j].children, children2NoMatches[i].children);
                                     }else{
                                         matches.push(children1NoMatches[j].node); //Zu den richtigen Elementen hinzufügen
+                                        mismatches.push(...nextMatchingElement.mismatches);
+                                        attrMismatch.push(...nextMatchingElement.attrMismatch);
+                                        nodeNameMismatch.push(...nextMatchingElement.nodeNameMismatch);
                                         checkChildren(children1NoMatches[j].children, nextMatchingElement.matchingElement.children);
                                     }
                                 } else {
                                     matches.push(nextMatchingElement.matchingElement.node);
                                     mismatches.push(...nextMatchingElement.nonMatchingElements);
+                                    attrMismatch.push(...nextMatchingElement.missingElements);
+                                    nodeNameMismatch.push(...nextMatchingElement.nodeNameMismatch);
                                     checkChildren(nextMatchingElement.matchingElement.children, children2NoMatches[i].children);
                                 }
                             }
@@ -273,11 +283,13 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
 
 function findNextMatchingElement(node, children) {
     let nonMatchingElements = [];
+    let attrMismatch = [];
+    let nodeNameMismatch = [];
     let visitedNodes = new Set();
 
     const checkChild = (child) => {
         if (visitedNodes.has(child.node)) {
-            return {nonMatchingElements: nonMatchingElements, matchingElement: null};
+            return {nodeNameMismatch: nodeNameMismatch, attrMismatch: attrMismatch, nonMatchingElements: nonMatchingElements, matchingElement: null};
         }
         //Element besucht
         visitedNodes.add(child.node);
@@ -286,40 +298,35 @@ function findNextMatchingElement(node, children) {
         let nodeAttributes1 = Object.fromEntries(Array.from(node.attributes).map(attr => [attr.name, attr.value]));
         let nodeAttributes2 = Object.fromEntries(Array.from(child.node.attributes).map(attr => [attr.name, attr.value]));
 
-        let isMatch = true;
+        let attrMatch = true;
+        let nodeMatch = true;
         for (let attr in nodeAttributes1) {
             if (attr !== "id" && nodeAttributes1[attr] !== nodeAttributes2[attr]) { //Überprüfung der Attribute
-                isMatch = false;
+                attrMatch = false;
                 break;
             }
         }
 
         if(node.nodeName !== child.node.nodeName){
-            isMatch = false;
+            nodeMatch = false;
         }
 
-        if (!isMatch && !nonMatchingElements.includes(child.node)) {
-            nonMatchingElements.push(child.node);
+        if(!attrMatch && !nodeMatch){
+            if(!nonMatchingElements.includes(child.node)) nonMatchingElements.push(child.node);
+        }else{
+            if(!attrMatch) attrMismatch.push(child.node);
+            if(!nodeMatch) nodeNameMismatch.push(child.node);
         }
 
-        if (isMatch) {
-            return { nonMatchingElements: nonMatchingElements, matchingElement: child };
+        if (attrMatch && nodeMatch) {
+            return { nodeNameMismatch: nodeNameMismatch, attrMismatch: attrMismatch ,nonMatchingElements: nonMatchingElements, matchingElement: child };
         } else if (child.children.length > 0) { //falls Kinder existieren
-            let matchingChild = null;
             for (let i = 0; i < child.children.length; i++) {
-                let result = checkChild(child.children[i]); //Überprüfe Kinder
-                if (result.matchingElement) { //falls match füge alle Elemente dem jeweilige Array zu
-                    matchingChild = result.matchingElement;
-                    nonMatchingElements = result.nonMatchingElements;
-                }
-            }
-
-            if (matchingChild) {
-                return { nonMatchingElements: nonMatchingElements, matchingElement: matchingChild };
+                return checkChild(child.children[i]); //Überprüfe Kinder
             }
         }
 
-        return {nonMatchingElements: null, matchingElement: null}; // gibt null zurück falls keins gefunden wurde
+        return {nodeNameMismatch: null, attrMismatch: null,nonMatchingElements: null, matchingElement: null}; // gibt null zurück falls keins gefunden wurde
     }
 
     for (let i = 0; i < children.length; i++) {
@@ -329,7 +336,7 @@ function findNextMatchingElement(node, children) {
         }
     }
 
-    return {nonMatchingElements: null, matchingElement: null}; // gibt null zurück falls keins gefunden wurde
+    return {nodeNameMismatch: null, attrMismatch: null,nonMatchingElements: null, matchingElement: null}; // gibt null zurück falls keins gefunden wurde
 }
 
 //fügt alle Elemente aller Bäume in Arrays
@@ -416,7 +423,7 @@ function compareMessageFlows(bpmnElements1, messageFlows1, bpmnElements2, messag
                 return false;
             }
         }
-        console.log(bpmnElements1);
+        
         return true;
     }
 
@@ -549,6 +556,12 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     allNonMatchingNodeNames = allNonMatchingNodeNames.filter((item, index, self) => self.indexOf(item) === index);
     allMissingElements = allMissingElements.filter((item, index, self) => self.indexOf(item) === index);
 
+    //filter dataObjects heraus weil diese keine visuellen Elemente darstellen
+    allNonMatchingElements = allNonMatchingAttributes.filter(element => element.nodeName !== ("bpmn:dataObject"));
+    //filtere lose Elemente und füge sie ins allNonMatchingelements ein
+    let looseElements = diagram1.processes.bpmnElementsArray.filter(element => !allMatchingElements.some(match => match.getAttribute("id") === element.getAttribute("id")));
+    allNonMatchingElements.push(...looseElements);
+    allNonMatchingElements = allNonMatchingElements.filter(e => !allNonMatchingAttributes.some(a => a.getAttribute("id") === e.getAttribute("id")));
 
 
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 

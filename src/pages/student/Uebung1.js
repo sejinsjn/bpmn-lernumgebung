@@ -286,20 +286,7 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
 
   //Nur wenn Überprüfung stattgefunden hat
   if(compareResult.mismatches !== undefined && parsedDiagram !== undefined){
-    //Finde alle Elemente die keine Verbindung haben bzw lose sind
-    const elementsWithoutConnections = parsedDiagram.processes.bpmnElementsArray.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element))
-    .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
-
-    //füge lose Elemente zu den mismatches
-    elementsWithoutConnections.forEach(element => {
-      if(!compareResult.mismatches.includes(parsedDiagram.processes.bpmnElements.get(element.getAttribute("id")))){
-        compareResult.mismatches.push(parsedDiagram.processes.bpmnElements.get(element.getAttribute("id")));
-      }
-    });
-
-    //filter dataObjects heraus weil diese keine visuellen Elemente darstellen
-    compareResult.mismatches = compareResult.mismatches.filter(element => element.nodeName !== ("bpmn:dataObject"));
-
+    
     //Filter alle mismatches aus, die auch in matches sind
     const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
     .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
@@ -317,7 +304,7 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
 
     //Rückmeldung für Elemente mit falschen Attributen
     let wrongElementNameString = "Die folgenden Elemente sind nicht richtig beschriftet. Bitte kontrolliere nochmal die Beschriftungen der folgenden Element. ";
-    result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={filteredElementNames}/>);
+    result.push(<Feedback key={2} Header='Falsche Beschriftungen' Description={wrongElementNameString} Elements={compareResult.attrMismatch}/>);
 
     //Rückmeldung für alle Elemente, die fehlen
     let missingElementString = "Die folgenden Elemente fehlen im Diagram.";
