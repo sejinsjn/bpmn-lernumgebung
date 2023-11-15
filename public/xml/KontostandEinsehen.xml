@@ -39,7 +39,7 @@
       <bpmn:incoming>Flow_19xoav8</bpmn:incoming>
       <bpmn:outgoing>Flow_1fr22v0</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0w7dg51" name="Einloggen">
+    <bpmn:task id="Activity_0w7dg51" name="In die App einloggen">
       <bpmn:incoming>Flow_1fr22v0</bpmn:incoming>
       <bpmn:outgoing>Flow_1q92j3n</bpmn:outgoing>
     </bpmn:task>
