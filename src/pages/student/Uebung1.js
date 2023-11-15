@@ -154,6 +154,16 @@ const ResizableDivs = () => {
         }
       }
 
+      //Färbe alle falsch benannten Elemente rot
+      for(let e of compareResult.attrMismatch){
+        const element = elementRegistry.get(e.getAttribute("id"));
+        if(element !== undefined){
+          modeling.setColor(element, {
+            stroke: 'red'
+          });
+        }
+      }
+
       //Färbe alle richtigen Elemente schwarz (Kann sein dass es mismatches gibt, die eigentlich keine sind)
       for(let e of compareResult.matches){
         const element = elementRegistry.get(e.getAttribute("id"));

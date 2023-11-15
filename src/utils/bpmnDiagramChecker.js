@@ -166,7 +166,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                                     nextMatchingElement = findNextMatchingElement(children1NoMatches[j].node, children2NoMatches[i].children); //Prüfe ob tree1 in den Kindern von tree2 ist
     
                                     if (nextMatchingElement === null || nextMatchingElement.matchingElement === null) {
-                                        compareTree(children1NoMatches[j], children2NoMatches[i]);
+                                        compareTree(children1NoMatches[j], children2NoMatches[i], bpmnElements1, bpmnElements2);
                                         checkChildren(children1NoMatches[j].children, children2NoMatches[i].children);
                                     }else{
                                         matches.push(children1NoMatches[j].node); //Zu den richtigen Elementen hinzufügen
@@ -247,6 +247,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                                 attrMismatch.push(child1);
                             }
                     }
+                    
                     
                     //falls nur ein Element Input oder Output Elemente besitzt wird es zu den mismatches hinzugefügt
                     if(!children1[i].nodeName.includes("incoming") && !children1[i].nodeName.includes("outgoing")){
