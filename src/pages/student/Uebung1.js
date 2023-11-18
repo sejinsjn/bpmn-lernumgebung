@@ -57,6 +57,7 @@ const ResizableDivs = () => {
     
 
   //Alle nötigen useState Konstanten
+  const [taskData, setTaskData] = useState(null);
   const [task, setTask] = useState(""); //Aufgabenstellung - string
   const [diagram, setDiagram] = useState(""); //XML welches in den Editor geladen wird
   const [parsedDiagram, setParsedDiagram] = useState([]); //Beinhaltet die Objekte processes, collaborations, trees von diagram
@@ -117,6 +118,7 @@ const ResizableDivs = () => {
     };
 
     reader.readAsText(file);
+    event.target.value = null;
   };
 
   //Speichert das Diagram als XML oder SVG
@@ -136,9 +138,19 @@ const ResizableDivs = () => {
     }
   };
 
+  //Auswahl von anderen Aufgaben
+  const handleSelectChange = (event) => {
+    var index = Object.keys(taskData).findIndex((key) => taskData[key].name === event.target.value);
+    index++;
+    setTaskNumber(index);
+    setTask(taskData[index]);
+    setTries(0);
+    setCompareResult("");
+  };
+
   //Verarbeite die Ergebnisse nach dem Überprüfen
   useEffect(() => {
-    if(modelerRef.current != null){
+    if(modelerRef.current != null && compareResult !== ""){
       compareResult.mismatches = compareResult.mismatches.filter(element => element.nodeName !== ("bpmn:dataObject"));
       
       const elementRegistry = modelerRef.current.get('elementRegistry');
@@ -202,7 +214,9 @@ const ResizableDivs = () => {
       }
 
       const diagramURL = jsonData[randomNumber].diagram;
-      setTask(jsonData[randomNumber].task);
+      setTask(jsonData[randomNumber]);
+      //speichert alle Aufgabendaten ab
+      setTaskData(jsonData);
 
       //Parse die Lösung damit diese bereit ist für den Vergleich
       fetch(diagramURL)
@@ -248,6 +262,13 @@ const ResizableDivs = () => {
       </div>
       <div  className='rightHeader'>
         <h5 className='headerTitle'>Versuche: {tries}</h5>
+        <select className='taskSelect' value={task.name} onChange={handleSelectChange}>
+          {taskData && Object.keys(taskData).map((key) => (
+            <option key={key} value={taskData[key].name}>
+              {taskData[key].name}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
     <div id="container">
@@ -256,17 +277,17 @@ const ResizableDivs = () => {
               <div className="editor" ref={containerRef}></div>
           </div>
           <div className='buttonContainerLeft'>
-            <button className='buttonContainerLeftButton' onClick={() => {clearDiagram();}}>Diagram löschen</button>
             <input type="file" accept=".xml" onChange={handleFileChange} />
-            <button onClick={() => handleSave("xml")}>Save as XML</button>
-            <button onClick={() => handleSave("svg")}>Save as SVG</button>
+            <button className='buttonContainerLeftButton' onClick={() => handleSave("xml")}>Save as XML</button>
+            <button className='buttonContainerLeftButton' onClick={() => handleSave("svg")}>Save as SVG</button>
             <Popup open={isOpen} onClose={() => setIsOpen(false)} position="right center">
               <div className='popupContent'>
                 Bisher hatten Sie schon fünf Versuche. Den Weg zur Lösung finden Sie unter dem Feedback/Ergebnis
                 <button className='closePopupButton' onClick={() => setIsOpen(false)}>Close</button>
               </div>
             </Popup>
-            <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Testen</button>
+            <button className='buttonContainerLeftButton' onClick={() => {clearDiagram();}}>Diagram löschen</button>
+            <button className='buttonContainerLeftButton' onClick={() => {checkIfSame(); setActiveRightDiv('result')}}>Prüfen</button>
           </div>
       </div>
       <div id="rightDiv">
@@ -275,7 +296,7 @@ const ResizableDivs = () => {
               <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
           </div>
           <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
-            <ReactMarkdown>{task}</ReactMarkdown><br/>
+            <ReactMarkdown>{task.task}</ReactMarkdown><br/>
             Die Aufgabe sollte in 5 Versuchen erledigt werden.
             Die folgenden Elemente und Beschriftungen müssen genutzt werden: <br/>
             {initializeBeschriftungen(parsedSolution)}

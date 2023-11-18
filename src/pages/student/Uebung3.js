@@ -2,7 +2,7 @@ import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer';
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import React, { useState, useEffect, useRef } from 'react';
-import './Uebung3.css';
+import './Uebung1.css';
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
@@ -28,6 +28,7 @@ const ResizableDivs = (randomNumber) => {
     const [parsedDiagram, setParsedDiagram] = useState(null); //Beinhaltet die Objekte processes, collaborations, trees von solution
     const [jsonLoaded, setJsonLoaded] = useState(false); // Ob JSON geladen wurde
     const [taskNumber, setTaskNumber] = useState(0); // Welche Aufgabe geladen wurde
+    const [activeRightDiv, setActiveRightDiv] = React.useState('task');
 
     const countMatchingElements = (array1, array2) => {
         let count = 0;
@@ -63,9 +64,13 @@ const ResizableDivs = (randomNumber) => {
             setIsSolutionCorrect(false);
         }
     };
-    
 
-    const [activeRightDiv, setActiveRightDiv] = React.useState('task');
+    const handleSelectChange = (event) => {
+        var index = Object.keys(data).findIndex((key) => data[key].name === event.target.value);
+        index++;
+        setTaskNumber(index);
+        setTask(data[index]);
+    };
 
     React.useEffect(() => {
         interact('#rightDiv')
@@ -79,11 +84,9 @@ const ResizableDivs = (randomNumber) => {
             target.style.width = event.rect.width + 'px';
             otherTarget.style.width = (otherTarget.parentNode.offsetWidth - event.rect.width) + 'px';
           });
-      }, []);
+    }, []);
 
-   
-
-      useEffect(() => {
+    useEffect(() => {
         if (!viewerRef.current && containerRef.current) {
             viewerRef.current = new NavigatedViewer({
                 container: containerRef.current,
@@ -144,7 +147,7 @@ const ResizableDivs = (randomNumber) => {
                 }else{
                     if(hasMarkerWrong){
                         canvas.removeMarker(id, "highlightWrong");
-                        var index = selectedElements.indexOf(id);
+                        index = selectedElements.indexOf(id);
                         if (id !== -1) {
                             selectedElements.splice(index, 1);
                         }
@@ -174,53 +177,60 @@ const ResizableDivs = (randomNumber) => {
     }, [diagram, data]);
 
     useEffect(() => {
-      }, [feedback, parsedDiagram]);
+    }, [feedback, parsedDiagram]);
 
     return (
-        <div id="container">
-            <div id="leftDiv">
-                <div id="editorContainer">
-                    <div className="editor" ref={containerRef}></div>
+        <>
+            <div id="header">
+                <div className='leftHeader'>
+                    <Link id="backButton" to="/">
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                    <p id="backText">Zurück zur Startseite</p>
+                    </Link>
                 </div>
-                <div className='buttonContainerLeft'>
-                <button className='buttonContainerLeftButton' onClick={() => {checkSelectedElements(selectedElements); setActiveRightDiv('result')}}>Testen</button>
-                <button className='buttonContainerLeftButton'>Lösung</button>
+                <div  className='middleHeader'>
+                    <h2 className='headerTitle'>Schwachstellenanalyse</h2>
                 </div>
-            </div>
-            <div id="rightDiv">
-                <div className='buttonContainerRight'>
-                    <button className='divRightButton' onClick={() => setActiveRightDiv('task')} style={{ backgroundColor: activeRightDiv === 'task' ? 'lightblue' : '' }}>Aufgabe</button>
-                    <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
-                </div>
-                <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
-                    <ReactMarkdown>{task}</ReactMarkdown>
-                </div>
-                <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
-                    <Feedback Header='Schwachstellen' Description={feedback}/>
-                    {isSolutionCorrect && <SchwachstellenErklaerung Vulnerabilities={vulnerabilities} Explanations={explanations} ParsedDiagram={parsedDiagram}/>}
+                <div  className='rightHeader'>
+                    <select className='taskSelect' value={task.name} onChange={handleSelectChange}>
+                        {data && Object.keys(data).map((key) => (
+                            <option key={key} value={data[key].name}>
+                                {data[key].name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
-        </div>
+            <div id="container">
+                <div id="leftDiv">
+                    <div id="editorContainer">
+                        <div className="editor" ref={containerRef}></div>
+                    </div>
+                    <div className='buttonContainerLeft'>
+                    <button className='buttonContainerLeftButton' onClick={() => {checkSelectedElements(selectedElements); setActiveRightDiv('result')}}>Prüfen</button>
+                    </div>
+                </div>
+                <div id="rightDiv">
+                    <div className='buttonContainerRight'>
+                        <button className='divRightButton' onClick={() => setActiveRightDiv('task')} style={{ backgroundColor: activeRightDiv === 'task' ? 'lightblue' : '' }}>Aufgabe</button>
+                        <button className='divRightButton' onClick={() => setActiveRightDiv('result')} style={{ backgroundColor: activeRightDiv === 'result' ? 'lightblue' : '' }}>Ergebnis</button>
+                    </div>
+                    <div id={`task`} className={activeRightDiv === 'task' ? 'active' : ''}>
+                        <ReactMarkdown>{task}</ReactMarkdown>
+                    </div>
+                    <div id={`result`} className={activeRightDiv === 'result' ? 'active' : ''} >
+                        <Feedback Header='Schwachstellen' Description={feedback}/>
+                        {isSolutionCorrect && <SchwachstellenErklaerung Vulnerabilities={vulnerabilities} Explanations={explanations} ParsedDiagram={parsedDiagram}/>}
+                    </div>
+                </div>
+            </div>
+        </> 
     );
 }
 
 export default function App() {
       return (
           <div className="App">
-                  <div id="header">
-                    <div className='leftHeader'>
-                      <Link id="backButton" to="/">
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                        <p id="backText">Zurück zur Startseite</p>
-                      </Link>
-                    </div>
-                    <div  className='middleHeader'>
-                      <h2 className='headerTitle'>Schwachstellenanalyse</h2>
-                    </div>
-                    <div  className='rightHeader'>
-                      
-                    </div>
-                  </div>
                 <ResizableDivs/>
           </div>
       );
