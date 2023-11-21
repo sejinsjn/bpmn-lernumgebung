@@ -146,6 +146,7 @@ const ResizableDivs = () => {
     setTask(taskData[index]);
     setTries(0);
     setCompareResult("");
+    setParsedSolution("");
   };
 
   //Verarbeite die Ergebnisse nach dem Überprüfen
@@ -278,8 +279,8 @@ const ResizableDivs = () => {
           </div>
           <div className='buttonContainerLeft'>
             <input type="file" accept=".xml" onChange={handleFileChange} />
-            <button className='buttonContainerLeftButton' onClick={() => handleSave("xml")}>Save as XML</button>
-            <button className='buttonContainerLeftButton' onClick={() => handleSave("svg")}>Save as SVG</button>
+            <button className='buttonContainerLeftButton' onClick={() => handleSave("xml")}>Speichern als XML</button>
+            <button className='buttonContainerLeftButton' onClick={() => handleSave("svg")}>Speichern als SVG</button>
             <Popup open={isOpen} onClose={() => setIsOpen(false)} position="right center">
               <div className='popupContent'>
                 Bisher hatten Sie schon fünf Versuche. Den Weg zur Lösung finden Sie unter dem Feedback/Ergebnis

@@ -168,9 +168,7 @@ function compareTree(tree1, tree2, bpmnElements1, bpmnElements2) {
                                         checkChildren(children1NoMatches[j].children, children2NoMatches[i].children);
                                     }else{
                                         matches.push(children1NoMatches[j].node); //Zu den richtigen Elementen hinzufügen
-                                        mismatches.push(...nextMatchingElement.mismatches);
-                                        attrMismatch.push(...nextMatchingElement.attrMismatch);
-                                        nodeNameMismatch.push(...nextMatchingElement.nodeNameMismatch);
+                                        missingElements.push(...nextMatchingElement.nonMatchingElements);
                                         checkChildren(children1NoMatches[j].children, nextMatchingElement.matchingElement.children);
                                     }
                                 } else {
@@ -560,8 +558,8 @@ export function compareBpmnDiagrams2(diagram1, diagram2){
     allNonMatchingElements.push(...looseElements);
      
     allNonMatchingElements = allNonMatchingElements.filter(e => !allNonMatchingAttributes.some(a => a.getAttribute("id") === e.getAttribute("id")));
-
-
+    allMissingElements = allMissingElements.filter(e => !allMatchingElements.some(a => a.getAttribute("name") === e.getAttribute("name")));
+    
     return {matches: allMatchingElements, mismatches: allNonMatchingElements, attrMismatch: allNonMatchingAttributes, nodeNameMismatch: allNonMatchingNodeNames, 
         missingElements: allMissingElements };
 }

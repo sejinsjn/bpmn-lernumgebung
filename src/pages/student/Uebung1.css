@@ -234,14 +234,14 @@ input[type="file"]::-webkit-file-upload-button {
 }
 
 input[type="file"]::before {
-  content: 'Select a file';
+  content: 'Durchsuchen';
   display: inline-block;
   background-color: white;
   color: black;
   padding: 10px;
   cursor: pointer;
   width: 150px;
-  height: 50%;
+  height: 45px;
   border-radius: 10px;
   margin: 5px;
   border: none;
