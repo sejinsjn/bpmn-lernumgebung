@@ -366,8 +366,10 @@ function initializeBeschriftungen(parsedSolution) {
 
   if(parsedSolution.length === 0)
     return <></>;
-  else
+  else{
+    parsedSolution.processes.bpmnElementsArray = parsedSolution.processes.bpmnElementsArray.filter(element => element.nodeName !== "bpmn:dataObject");
     result.push(<Beschriftungen ParsedSolution={parsedSolution}/>);
+  }
 
   return result;
 }
