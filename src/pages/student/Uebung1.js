@@ -16,8 +16,10 @@ import ReactMarkdown from 'react-markdown';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css'
 
-const ResizableDivs = () => {
-  //Palette im Editor in zwei Spalten anzeigen anstatt einer
+const Ubeung1 = () => {
+  /**
+   * Palette/Toolbar im Editor in zwei Spalten anzeigen anstatt einer durch das hinzufügen der klasse 'two-column'
+   */
   React.useEffect(() => {
       var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -37,9 +39,9 @@ const ResizableDivs = () => {
       return () => observer.disconnect();
   }, []);
   
-  const [activeRightDiv, setActiveRightDiv] = React.useState('task'); //
-
-  //ermöglich das resizen der rechten und linken Spalte
+  /**
+   * Ermöglicht das Vergrößern/Verkleinern des Editors und der Aufgabenspalte
+   */
   React.useEffect(() => {
     interact('#rightDiv')
       .resizable({
@@ -49,14 +51,16 @@ const ResizableDivs = () => {
         var target = event.target;
         var otherTarget = document.querySelector(`#leftDiv`);
   
+        // Die Breite des Ziels wird auf die Breite des Events/rechten Divs gesetzt
         target.style.width = event.rect.width + 'px';
-        //Vergrößer oder verkleiner die linke Spalte wenn rechte vergrößert oder verkleinert wird
+        // Die Breite des anderen Ziels wird auf die Differenz zwischen der Breite des Elternelements und der Breite des Events/rechten Divs gesetzt
         otherTarget.style.width = (otherTarget.parentNode.offsetWidth - event.rect.width) + 'px';
       });
   }, []);
     
 
   //Alle nötigen useState Konstanten
+  const [activeRightDiv, setActiveRightDiv] = React.useState('task'); 
   const [taskData, setTaskData] = useState(null);
   const [task, setTask] = useState(""); //Aufgabenstellung - string
   const [diagram, setDiagram] = useState(""); //XML welches in den Editor geladen wird
@@ -72,12 +76,14 @@ const ResizableDivs = () => {
   const modelerRef = useRef(null); // Reference für den Editor
   const feedbackRef = useRef(""); // Reference für den Feedback Div
 
-  //started die Überprüfung des erstellten Diagrams
+  /**
+   * Prüft die erstellte Lösung mit der Musterlösung mit der Funktion compareBpmnDiagrams2
+   */
   const checkIfSame = async () => {
     try {
-      let { xml } = await modelerRef.current.saveXML({ format: true }); //hole erstelltes Diagram
-      setParsedDiagram(parseBpmnDiagram(xml)); //Erstelle Bäume und hole alle Elemente
-      setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution)); //Überprüfe beide Diagramme
+      let { xml } = await modelerRef.current.saveXML({ format: true }); // hole erstelltes Diagram
+      setParsedDiagram(parseBpmnDiagram(xml)); // Erstelle Bäume und hole alle Elemente
+      setCompareResult(compareBpmnDiagrams2(parseBpmnDiagram(xml), parsedSolution)); // Überprüfe beide Diagramme
 
       //setze das aktuelle Diagram in den Editor
       xml = await modelerRef.current.saveXML({ format: true });
@@ -91,12 +97,16 @@ const ResizableDivs = () => {
     }
   };
 
-  //löscht das Diagram im Editor
+  /**
+   * Ersetzt das jetzige Diagramm durch ein neues leeres Diagramm
+   */ 
   const clearDiagram = async () => {
     setDiagram(modelerRef.current.createDiagram());
   };
   
-  //öffnen eines Diagrams im Editor basierend auf eine XML Datei
+  /**
+   * Ermöglicht das Öffnen einer XML Datei, um ein Diagramm in den Editor zu laden
+   */
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -121,7 +131,10 @@ const ResizableDivs = () => {
     event.target.value = null;
   };
 
-  //Speichert das Diagram als XML oder SVG
+  /**
+   * Speichert das erstellte Diagram als XML oder SVG basierend auf den Parameter format
+   * @param {*} format ist entweder xml oder svg
+   */
   const handleSave = async (format) => {
     try {
         if (format === "xml") {
@@ -149,7 +162,9 @@ const ResizableDivs = () => {
     setParsedSolution("");
   };
 
-  //Verarbeite die Ergebnisse nach dem Überprüfen
+  /**
+   * Anhand der Ergebnisse wird die Farbe der entsprechenden Elemente angepasst
+   */
   useEffect(() => {
     if(modelerRef.current != null && compareResult !== ""){
       compareResult.mismatches = compareResult.mismatches.filter(element => element.nodeName !== ("bpmn:dataObject"));
@@ -192,34 +207,37 @@ const ResizableDivs = () => {
 
   useEffect(() => {
   }, [diagram, solution, isOpen]);
-  
-  //Öffne Popup nach 5 Versuchen
+
+  /**
+   * Öffnet Popup beim fünften Versuch
+   */
   useEffect(() => {
     if(tries === 5){
       setIsOpen(true);
     } 
   }, [tries]);
 
-  //Lade eine Aufgabe beim Laden der Webseite
+  /**
+   * Lädt eine Aufgabe zufällig aus der uebung1.json
+   */
   useEffect(() => {
     fetch('/json/uebung1.json').then(response => response.json()).then(jsonData => {
       let randomNumber;
+      //Falls Aufgabe nicht geladen wurde, wird eine geladen ansonsten die gleiche Aufgabe bleibt
       if(!jsonLoaded){
-        //Lade Aufgabe nach einer zufälligen Nummer
         randomNumber = Math.floor(Math.random() * Object.keys(jsonData).length) + 1;
         setTaskNumber(randomNumber);
         setJsonLoaded(true);
       }else{
-        //Ansonsten lade die jetzige Aufgabe rein solange offen
         randomNumber = taskNumber;
       }
 
+      //Lädt Aufgabe aus der JSON-Datei
       const diagramURL = jsonData[randomNumber].diagram;
       setTask(jsonData[randomNumber]);
-      //speichert alle Aufgabendaten ab
       setTaskData(jsonData);
 
-      //Parse die Lösung damit diese bereit ist für den Vergleich
+      //Lädt das Diagramm anhand einer URL aus dem lokalen Ordner
       fetch(diagramURL)
         .then(response => response.text())
         .then(data => {
@@ -312,25 +330,32 @@ const ResizableDivs = () => {
   );
 };
 
-//Initialisiert die Rückmeldung
+/**
+ * Erstellt die Feedbacks anhand der Feedback-Komponente
+ * @param {*} parsedDiagram Ist die vom Nutzer erstellte Lösung
+ * @param {*} compareResult Das Ergebnis der Prüfung beider Lösungen
+ * @param {*} solution Musterlösung
+ * @param {*} tries Anzahl der Versuche
+ * @returns 
+ */
 function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
   let result = [];
 
-  //Nur wenn Überprüfung stattgefunden hat
+  //Feedback wird erstellt wenn Überprüfung stattgefunden hat und ein Diagramm vom Nutzer erstellt wurde
   if(compareResult.mismatches !== undefined && parsedDiagram !== undefined){
     
     //Filter alle mismatches aus, die auch in matches sind
     const filteredElements = compareResult.mismatches.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
     .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
 
-    //Rückmeldung für alle falschen Elemente (Element + Attribute oder einfach gehören nicht ins Diagram)
+    //Rückmeldung für alle falschen Elemente (Element + Attribute oder gehören einfach nicht ins Diagram)
     let wrongElementString = "Die folgenden Elemente sind nicht richtig dargestellt oder gehören nicht ins Diagram. Überprüfe nochmal " +
                               "auf Rechtschreibfehler und ob das ausgewählte Element stimmt.\n" + 
                               "Hinweis: Falls die Beschriftung stimmt aber das Element hier angezeigt wird, kann es sein, dass das Element an der falschen " + 
                               "Position erstellt wurde.";
     result.push(<Feedback key={1} Header='Falsche Elemente' Description={wrongElementString} Elements={filteredElements}/>);
 
-    //Filter alle elemente aus, die auch in matches sind
+    //Filter alle Elemente aus, die auch in matches sind
     const filteredElementNames = compareResult.attrMismatch.filter(element => !compareResult.matches.some(match => match.getAttribute("id") === element.getAttribute("id")))
       .reduce((unique, item) => unique.find(obj => obj.getAttribute('id') === item.getAttribute('id')) ? unique : [...unique, item], []);
 
@@ -360,7 +385,11 @@ function initializeFeedback(parsedDiagram, compareResult, solution, tries) {
   return result;
 }
   
-//Zeigt alle Elementen, die es in der Lösung gibt
+/**
+ * Initialisiert die ganzen Elemente, die in der Musterlösung existieren, mit der Beschriftungen-Komponente
+ * @param {*} parsedSolution Verarbeitete Musterlösung durch den Parser
+ * @returns 
+ */
 function initializeBeschriftungen(parsedSolution) {
   let result = [];
 
@@ -377,7 +406,7 @@ function initializeBeschriftungen(parsedSolution) {
 export default function App() {
     return (
         <div className="App">
-                <ResizableDivs/>
+                <Ubeung1 />
         </div>
     );
 }

@@ -14,7 +14,7 @@ import SchwachstellenErklaerung from '../../components/schwachstellenErklaerung'
 
 var selectedElements = [];
 
-const ResizableDivs = (randomNumber) => {
+const Ubeung3 = () => {
     const containerRef = useRef(null); // Reference für den Container wo der Viewer ist
     const viewerRef = useRef(null);  // Reference auf den Viewer
 
@@ -231,7 +231,7 @@ const ResizableDivs = (randomNumber) => {
 export default function App() {
       return (
           <div className="App">
-                <ResizableDivs/>
+                <Ubeung3 />
           </div>
       );
   }
