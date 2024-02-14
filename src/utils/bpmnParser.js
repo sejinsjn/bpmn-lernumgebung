@@ -42,7 +42,7 @@ function parseProcessElements(xpathResult){
    while(node){
       const children = node.children;
       for (let i = 0; i < children.length; i++) {
-         //Je nach element namen füge passendem Array hinzu
+         //Je nach element namen füge dieses passendem Array hinzu
          switch(children[i].nodeName){
             case "bpmn:startEvent":
                startEvents.push(children[i]);
@@ -147,6 +147,7 @@ function createTree(rootNode, bpmnElements, sequenceFlows, visited = new Set()) 
    return tree;
 }
 
+//Erstellt aus allen Prozessen Bäume durch Aufruf der createTree Funktion
 function createTrees(processes){
     let trees = [];
     for(let i = 0; i < processes.startEvents.length; i++){
